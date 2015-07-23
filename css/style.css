@@ -2,14 +2,42 @@
   padding-bottom: 100%;
 }
 
+.embed-responsive-558by672{
+  padding-bottom: 120.4%;
+}
+
 #side-panel {
-  padding: 50px;
+  //padding: 50px;
 }
 
 #projects-pane {
-  padding:50px;
+  //padding:50px;
+  height:100%;
+}
+
+.project {
+  padding-top:50px;
+}
+
+.description {
+  padding-top:12px;
 }
 
 h1 {
 	font-family: 'Chau Philomene One', sans-serif;
+}
+
+
+html {
+  height:100%;
+}
+
+body {
+  max-height:100%;
+  background-color:#f0f0f0;
+  color:#444444;
+}
+
+.main-contents {
+  padding-top:50px;
 }

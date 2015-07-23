@@ -16,48 +16,111 @@
       <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
       <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
     <![endif]-->
+
+    <link href='http://fonts.googleapis.com/css?family=Chau+Philomene+One' rel='stylesheet' type='text/css'>
+
+
+  </head>
+  <body onload=initialize()>
+    <div class = "container main-contents">
+      <div class = "row">
+        <div class = "col-xs-12">
+          <center>
+          <img src = "tommys_projects2.png"></img>
+          <br> tommyli@stanford.edu
+          </center>
+        </div>
+      </div>
+
+
+      <div class="row" id="projects-pane"> <!--scrollable projects-->
+        <div class="col-md-12 project">
+          <h3> Bees!</h3>
+          <!-- square aspect ratio -->
+          <!--div class="embed-responsive embed-responsive-square">
+            <video autoplay loop style="width=100%">
+              <source src="https://web.stanford.edu/~tommyli/bees.mp4" type="video/mp4">
+              "Your browser does not support the video tag."
+            </video>
+          </div-->
+          <div class="row">
+            <div class="col-xs-12 col-sm-4"> <!--was 249-->
+              <div class="embed-responsive embed-responsive-558by672">
+                <video autoplay loop style="width=100%">
+                  <source src="https://web.stanford.edu/~tommyli/gameplay.mov" type="video/mp4">
+                  "Your browser does not support the video tag."
+                </video>
+              </div>
+            </div>
+            <div class="col-xs-12 col-sm-8">
+              <div class="row">
+                <div class = "col-sm-6">
+                  <div class="embed-responsive embed-responsive-square">
+                    <video autoplay loop style="width=100%">
+                      <source src="https://web.stanford.edu/~tommyli/circles.mov" type="video/mp4">
+                      "Your browser does not support the video tag."
+                    </video>
+                  </div>
+                </div>
+                <div class = "col-sm-6">
+                  <div class="embed-responsive embed-responsive-square">
+                    <video autoplay loop style="width=100%">
+                      <source src="https://web.stanford.edu/~tommyli/mapgen.mov" type="video/mp4">
+                      "Your browser does not support the video tag."
+                    </video>
+                  </div>
+                </div>
+              </div>
+              <div class="row">
+                <div class="description col-sm-12">
+                  These are teasers from from my <a href="https://github.com/yeahpython/bees-bees-bees">evolution simulation project</a>, where I equipped a population of virtual bees with neural networks!
+                  <a href="http://stanford.edu/~tommyli/bees.html">
+                    More pictures here!
+                  </a>
+                </div>
+              </div>
+
+            </div>
+          </div>
+        </div>
+        <div class="col-md-12 project">
+          <h3> Rendering Voxel Worlds with ASCII</h3>
+          <center>
+          <div style="display-style:inline-block">
+              <pre id = "active-text" style = "max-width:100%; background-color:black; color:#00FF00; border:0">
+              </pre>
+          </div>
+          </center>
+        <div class = "description">
+          I've seen a couple of ASCII-based 3D renderers, but they seem to render scenes in a standard way, and then use characters as pixels. I wanted to render 3D scenes in ASCII in a way that seemed 'native' to ASCII, and made this. I may develop a more fleshed-out platformer with this concept later.
+        </div>
+
+        </div>
+        <div class="col-md-12 project">
+          <h3> Fun with Procedural Art </h3>
+          <video width="796" height="auto" max-width="100%" autoplay loop>
+          <source src="http://stanford.edu/~tommyli/procedural.mp4" type="video/mp4">
+          <!--source src="movie.ogg" type="video/ogg"-->
+          Your browser does not support the video tag.
+        </video>
+        </div>
+      </div>
+
+
+
+    </div>
+
+
     <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
     <!-- Include all compiled plugins (below), or include individual files as needed -->
     <script src="js/bootstrap.min.js"></script>
-
-    <link href='http://fonts.googleapis.com/css?family=Chau+Philomene+One' rel='stylesheet' type='text/css'>
-  </head>
-  <body>
-    <div class = "container-fluid">
-    <div class = "row">
-      <div class = "col-md-3" id="side-panel">
-        <h1 class="my-name"> <img src="images/me.jpg" style="vertical-align:bottom" width="50px"> Tommy Li </h1>
-        <h4>
-        I'm an undergraduate at Stanford with interests in mathematics, art and artificial intelligence.
-        </h4>
-        Check out my fun projects here, and contact me at tommyli@stanford.edu.
-      </div>
-      <div class = "col-md-9">
-        <div class="row" id="projects-pane"> <!--scrollable projects-->
-          <div class="col-md-7">
-            <h3> Evolving opponents </h3>
-            <!-- square aspect ratio -->
-            <div class="embed-responsive embed-responsive-square">
-              <video autoplay loop style="width=100%">
-                <source src="https://web.stanford.edu/~tommyli/bees.mp4" type="video/mp4">
-                "Your browser does not support the video tag."
-              </video>
-            </div>
-          </div>
-          <div class="col-md-7">
-            <h3> Rendering Voxel Worlds with ASCII</h3>
-          </div>
-          <div class="col-md-7">
-            <h3> Fun with Procedural Art </h3>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    </div>
-
-
+    <script type = "text/javascript" src="js/myjs.js"></script>
+    <style>
+    h3 {
+     font-family: 'Unica One', sans-serif;
+    }
+    </style>
     <link rel="stylesheet" type="text/css" href="css/style.css">
   </body>
 </html>
