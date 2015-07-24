@@ -12,8 +12,8 @@ $('video').mouseover(function(event) {
   event.stopPropagation();
   $(this).get(0).play();
 });
-
+/*
 $('video').mouseout(function(event) {
   event.stopPropagation();
   $(this).get(0).pause();
-});
+});*/
