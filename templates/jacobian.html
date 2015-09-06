@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+  <head>
+      <script src="/static/js/external/jquery-1.11.2.min.js"></script>
+
+      <!--loads a litte faster, I think-->
+      <!--script src="/static/js/external/three.min.js"></script-->
+      <link rel="stylesheet" type="text/css" href="/static/css/external/jquery.svg.css">
+      <script type="text/javascript" src="/static/js/external/jquery.svg.js"></script>
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r71/three.min.js"></script>
+      <script src="/static/js/external/snap.svg.js"></script>
+      <script src="/static/js/manifold.js"></script>
+      <script src="/static/js/JacobianDemo.js"></script>
+      <script src="/static/js/external/OrbitControls.js"></script>
+      <script src="/static/js/external/arbor.js"></script>
+      <script src="/static/js/external/THREEx.WindowResize.js"></script>
+      <!--script src="//js.leapmotion.com/leap-0.6.4.min.js"></script-->
+      <link rel="stylesheet" type="text/css" href="/static/css/style2.css">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  </head>
+  <body onload="foo()">
+    <svg version="1.1"
+         xmlns="http://www.w3.org/2000/svg"
+         width="100%" height="100%" id = "svg_annotation"></svg>
+    <!--svg version="1.1"
+         xmlns="http://www.w3.org/2000/svg"
+         width="400" height="300">
+      <style>
+        circle {
+          fill-opacity: 0.5;
+          stroke-width: 4;
+          fill: #3080d0;
+          stroke: #3080d0;
+        }
+      </style>
+      <circle id="my-circle" cx="100" cy="100" r="50" />
+    </svg-->
+    <div id = "button_array">
+      <div onclick="playPauseHander()" class="fancy_button" id="option">Pause Rendering</div>
+      <div class="fancy_button" id="toggle_info_panel_button">Toggle Info Panel</div>
+      <div class="fancy_button" id = "toggle_graph_button">Toggle Graph</div>
+      <br><div id = "debug"></div><br><div id = "debug2"></div>
+    </div>
+    <!--button onclick="toggleLeapControl()" id="control-button">Control with Leap Motion</button-->
+    <div id = "info_panel">
+  		<span id="control"></span>
+      <div id = "extra_content">
+        <div id = "description"></div>
+      </div>
+  	</div>
+    <div id = "boards" style = "display:inline-block"></div>
+    <canvas id="viewport" width="900" height="400"></canvas>
+  </body>
+</html>

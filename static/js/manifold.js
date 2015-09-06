@@ -206,7 +206,7 @@ console.log(this);
 		var scene = new THREE.Scene();
 		var camera;
 		if (dimensions == 3) {
-			camera = new THREE.PerspectiveCamera( 75, width / height, 0.1, 1000 );
+			camera = new THREE.PerspectiveCamera( 100, width / height, 0.1, 1000 );
 			camera.position.setX(10);
 			camera.position.setY(10);
 			camera.position.setZ(10);
@@ -316,12 +316,16 @@ console.log(this);
 		var newSpace = originalSpace.clone();
 		var jacobianMatrixName = jacobian.name + "<sub>" + controlPoint.name + "</sub>"
 		newSpace.name = jacobianMatrixName + "(" + originalSpace.name + ")";
+		/*
+		// not sure what this description really should be.
+
 		$("<div/>")
 			.addClass("symbol")
 			.html(newSpace.name)
 			.appendTo($("#description"));
 		$("#description")[0].innerHTML += ": Tangent space at image of point " + controlPoint.name + " under " + f.name;
 		$("#description")[0].innerHTML += "<br>";
+		*/
 		// sys.addEdge(f.name, newSpace.name);
 		//sys.addEdge(controlPoint.name, newSpace.name);
 		sys.addEdge(originalSpace.name, newSpace.name, {name: jacobianMatrixName});
@@ -399,7 +403,7 @@ console.log(this);
 			.appendTo($("#description"));
 		var explanation = $("<div/>")
 			.addClass("symbol_explanation")
-			.html(": Jacobian of some function evaluated at " + controlPoint.name)
+			.html(": Jacobian evaluated at " + controlPoint.name)
 			.appendTo($("#description"));
 		$("#description").append("<br>");
 		//$(".symbol_explanation")[0].innerHTML += ": jacobian of some function evaluated at " + controlPoint.name + "<br>";
@@ -509,11 +513,15 @@ console.log(this);
 
 
 	manifold.mathFunction = function(f, name) {
+		/*
+		// don't add description until it's used...
+
 		$("<div/>")
 			.addClass("symbol")
 			.html(name)
 			.appendTo($("#description"));
 		$("#description")[0].innerHTML += ": Function<br>";
+		*/
 		return {
 			transform: f,
 			name: name
@@ -537,7 +545,10 @@ console.log(this);
 	var kHideControlPoint = false;
 	var kUseSmallControlPoint = true;
 	var kUseBigClickSurface = false;
-	manifold.controlPoint = function(board, space, dimensions, name, initialPosition) {
+	manifold.controlPoint = function(board, space, dimensions, name, initialPosition, interactive) {
+		if (interactive === undefined) {
+			interactive = true;
+		}
 		$("<div/>")
 			.addClass("symbol")
 			.html(name)
@@ -547,23 +558,28 @@ console.log(this);
 		dimensions = dimensions || 3;
 		var cursorSurface, controlPointMaterial;
 
+		var controlPointColor = interactive ? 0xffffff : 0x333333;
+
+		var kUnselectedOpacity = 0.3;
 		if (kUseSmallControlPoint) {
 			cursorSurface = new THREE.SphereGeometry(0.1, 100, 100);
 
 			controlPointMaterial = new THREE.MeshBasicMaterial({
-				color:0xffffff,
-				//blending: THREE.AdditiveBlending,
-				depthWrite:false
+				color: controlPointColor,
+				transparent: true,
+				opacity: kUnselectedOpacity,
+				blending: THREE.AdditiveBlending,
+				depthWrite: false
 			});
 		} else {
 			cursorSurface = new THREE.SphereGeometry(2.5, 100, 100);
 
 			controlPointMaterial = new THREE.MeshBasicMaterial({
-				color:0xffffff,
-				transparent:true,
-				opacity:0.3,
+				color: controlPointColor,
+				transparent: true,
+				opacity: kUnselectedOpacity,
 				blending: THREE.AdditiveBlending,
-				depthWrite:false
+				depthWrite: false
 			});
 		}
 		var funMesh = new THREE.Mesh(cursorSurface, controlPointMaterial);
@@ -613,104 +629,108 @@ console.log(this);
 		var offset = new THREE.Vector3();
 
 		// Allows you to select objects and possibly drag them around
-		document.addEventListener('mousedown', function (event) {
-			var mouse_pos = getRelativeMousePositionInBoard(event.pageX, event.pageY, board);
-			mouse.x = mouse_pos.x;
-			mouse.y = mouse_pos.y;
-			if (Math.abs(mouse_pos.x) < 1 && Math.abs(mouse_pos.y) < 1 && manifold.animating) {
-				space.updateMatrixWorld();
-				var intersects = raycaster.intersectObject( clickMesh);
-				if (intersects.length > 0) {
-					board.controls.enabled = false;
-					selection = funMesh;
-					selection.material.color.set(0x00ff00);
-					$("#point_" + name).css("color", "green");
-					var plane_intersects = raycaster.intersectObject(plane);
-					//offset.copy(plane_intersects[0].point).sub(plane.position);
-					if (plane_intersects.length > 0) {
-						offset.copy(selection.position);
-						offset.sub(plane_intersects[0].point);
-					} else {
-						console.log("error, raycaster can't hit plane! Maybe the plane" +
-							" is the wrong size or facing the wrong direction.");
-						console.log(raycaster.ray.origin);
-						console.log(raycaster.ray.direction);
-						console.log(plane);
+		if (interactive) {
+			document.addEventListener('mousedown', function (event) {
+				var mouse_pos = getRelativeMousePositionInBoard(event.pageX, event.pageY, board);
+				mouse.x = mouse_pos.x;
+				mouse.y = mouse_pos.y;
+				if (Math.abs(mouse_pos.x) < 1 && Math.abs(mouse_pos.y) < 1 && manifold.animating) {
+					space.updateMatrixWorld();
+					var intersects = raycaster.intersectObject( clickMesh);
+					if (intersects.length > 0) {
+						board.controls.enabled = false;
+						selection = funMesh;
+						selection.material.color.set(0x00ff00);
+						$("#point_" + name).css("color", "green");
+						var plane_intersects = raycaster.intersectObject(plane);
+						//offset.copy(plane_intersects[0].point).sub(plane.position);
+						if (plane_intersects.length > 0) {
+							offset.copy(selection.position);
+							offset.sub(plane_intersects[0].point);
+						} else {
+							console.log("error, raycaster can't hit plane! Maybe the plane" +
+								" is the wrong size or facing the wrong direction.");
+							console.log(raycaster.ray.origin);
+							console.log(raycaster.ray.direction);
+							console.log(plane);
+						}
 					}
 				}
-			}
-		}, false);
+			}, false);
 
-		// Moves selected object if there is one, and does highlighting
-		document.addEventListener('mousemove', function (event) {
-			// code adapted from this tutorial for dragging and dropping objects:
-			// https://www.script-tutorials.com/webgl-with-three-js-lesson-10/
-			event.preventDefault();
-			var mouse_pos = getRelativeMousePositionInBoard(event.pageX, event.pageY, board);
+			// Moves selected object if there is one, and does highlighting
+			document.addEventListener('mousemove', function (event) {
+				// code adapted from this tutorial for dragging and dropping objects:
+				// https://www.script-tutorials.com/webgl-with-three-js-lesson-10/
+				event.preventDefault();
+				var mouse_pos = getRelativeMousePositionInBoard(event.pageX, event.pageY, board);
 
-			// Get 3D vector from 3D mouse position using 'unproject' function
+				// Get 3D vector from 3D mouse position using 'unproject' function
 
-			var vector = new THREE.Vector3(mouse_pos.x, mouse_pos.y, 1);
-			vector.clampScalar(-1, 1);
-			vector.unproject(board.camera);
+				var vector = new THREE.Vector3(mouse_pos.x, mouse_pos.y, 1);
+				vector.clampScalar(-1, 1);
+				vector.unproject(board.camera);
 
-			// Set the raycaster position
-			if (dimensions == 3) {
-				raycaster.set(board.camera.position, vector.sub( board.camera.position ).normalize());
-			} else {
-				raycaster.set(vector, new THREE.Vector3(0,0,1));
-			}
-			if (selection) {
-				// Check the position where the plane is intersected
-				//
-				// TODO: contrain mouse position to board and redo raycast.
-				//
-				var intersects = raycaster.intersectObject(plane);
-				// Reposition the object based on the intersection point with the plane
-				// selection.position.copy(intersects[0].point.sub(offset));
-				selection.position.copy(intersects[0].point.add(offset));
-			} else {
-				// funMesh.material.color.set(0xff0000);
-				// funMesh.material.opacity = 0;
-				// Update position of the plane if need
-				var object_intersects = raycaster.intersectObject(clickMesh);
-				if (object_intersects.length > 0) {
-					if (object_intersects[0].object !== clickMesh) {
-						throw "Unexpected collision";
-					}
-					funMesh.material.color.set(0xffff00);
-					$("#point_" + name).css("color", "yellow");
-					funMesh.material.opacity = 0.1;
-					plane.position.copy(funMesh.position);
-					if (dimensions == 2) {
-						plane.position.setZ(0);
-					}
-					// console.log(plane.position);
-
-					//plane.position.setFromMatrixPosition( object_intersects[0].object.matrixWorld );
-					// console.log(plane.position);
-					if (dimensions == 2) {
-						// no looking required because angle is fixed.
-						plane.lookAt(new THREE.Vector3(0,0,-1).add(plane.position));
-					} else {
-						plane.lookAt(board.camera.position);
-					}
+				// Set the raycaster position
+				if (dimensions == 3) {
+					raycaster.set(board.camera.position, vector.sub( board.camera.position ).normalize());
 				} else {
-					$("#point_" + name).css("color", "");
-					if (kHideControlPoint) {
-						funMesh.material.color.set(0xff0000);
-						funMesh.material.opacity = 0;
+					raycaster.set(vector, new THREE.Vector3(0,0,1));
+				}
+				if (selection) {
+					// Check the position where the plane is intersected
+					//
+					// TODO: contrain mouse position to board and redo raycast.
+					//
+					var intersects = raycaster.intersectObject(plane);
+					// Reposition the object based on the intersection point with the plane
+					// selection.position.copy(intersects[0].point.sub(offset));
+					selection.position.copy(intersects[0].point.add(offset));
+				} else {
+					// funMesh.material.color.set(0xff0000);
+					// funMesh.material.opacity = 0;
+					// Update position of the plane if need
+					var object_intersects = raycaster.intersectObject(clickMesh);
+					if (object_intersects.length > 0) {
+						if (object_intersects[0].object !== clickMesh) {
+							throw "Unexpected collision";
+						}
+						funMesh.material.color.set(0xffff00);
+						$("#point_" + name).css("color", "yellow");
+						funMesh.material.opacity = 0.6;
+						plane.position.copy(funMesh.position);
+						if (dimensions == 2) {
+							plane.position.setZ(0);
+						}
+						// console.log(plane.position);
+
+						//plane.position.setFromMatrixPosition( object_intersects[0].object.matrixWorld );
+						// console.log(plane.position);
+						if (dimensions == 2) {
+							// no looking required because angle is fixed.
+							plane.lookAt(new THREE.Vector3(0,0,-1).add(plane.position));
+						} else {
+							plane.lookAt(board.camera.position);
+						}
+					} else {
+						funMesh.material.color.set(controlPointColor);
+						funMesh.material.opacity = kUnselectedOpacity;
+						$("#point_" + name).css("color", "");
+						if (kHideControlPoint) {
+							funMesh.material.color.set(0xff0000);
+							funMesh.material.opacity = 0;
+						}
 					}
 				}
-			}
 
-		}, false);
-		document.addEventListener('mouseup', function (e) {
-			for (var i = 0; i < boards.length; i++) {
-				boards[i].controls.enabled = true;
-			}
-			selection = null;
-		}, false);
+			}, false);
+			document.addEventListener('mouseup', function (e) {
+				for (var i = 0; i < boards.length; i++) {
+					boards[i].controls.enabled = true;
+				}
+				selection = null;
+			}, false);
+		}
 		funMesh.name = name;
 		return funMesh;
 	};
@@ -782,10 +802,10 @@ console.log(this);
 
 
 					var motion = new THREE.Vector3(0,0,0).copy(controlPoint.position).sub(gridMesh.geometry.vertices[i]);
-					//var multiplying_factor = 0.5 + 0.5 * Math.sin(-3 * motion.length() + 0.002 * new Date().getTime());
+					// var multiplying_factor = 0.5 + 0.5 * Math.sin(-3 * motion.length() + 0.002 * new Date().getTime());
 					var t = Math.max(0, 1 - motion.length() / bright_radius);
 					t = Math.min(1, t);
-					//t *= multiplying_factor;
+					// t *= multiplying_factor;
 					var color = new THREE.Color( 0xffffff );
 					color.setRGB(t,t,t);
 					gridMesh.geometry.colors[i] = color;
@@ -794,7 +814,7 @@ console.log(this);
 					var motion_2 = new THREE.Vector3(0,0,0).copy(controlPoint.position).sub(gridMesh.geometry.vertices[i+1]);
 					var t_2 = Math.max(0, 1 - motion_2.length() / bright_radius );
 					t_2 = Math.min(1, t_2);
-					//t_2 *= multiplying_factor;
+					// t_2 *= multiplying_factor;
 					var color_2 = new THREE.Color( 0xffffff );
 					color_2.setRGB(t_2,t_2,t_2);
 					gridMesh.geometry.colors[i+1] = color_2;
@@ -822,11 +842,12 @@ console.log(this);
 		if (dimensions != 3 && dimensions != 2) {
 			throw "Not dealing with less than three dimensions at the moment";
 		}
+		/*
 		$("<div/>")
 			.addClass("symbol")
 			.appendTo($("#description"));
 		$("#description")[0].innerHTML += ": " + dimensions + "-dimensional basis in " + space.name + "<br>"
-
+		*/
 		var basisLength = 1.0;
 
 		var basis = new THREE.Object3D();
@@ -990,11 +1011,15 @@ console.log(this);
 		//sys.addEdge(controlPoint.name, space.name);
 		//sys.addEdge(controlPoint.name, parent.name);
 		//sys.addEdge(parent.name, space.name);
+		/*
+		// Add description. But what is the description supposed to be?
 		$("<div/>")
 			.addClass("symbol")
 			.html(space.name)
 			.appendTo($("#description"));
 		$("#description")[0].innerHTML += ": Tangent space of manifold "+ parent.name + " at point " + controlPoint.name + "<br>";
+		*/
+
 		parent.add(space);
 		updateRules.push(
 		{	update:function(){

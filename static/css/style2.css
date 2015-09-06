@@ -4,11 +4,15 @@ body {
 }
 
 #debug {
+	text-align:center;
+	font-size: 10px;
 	color:red;
 }
 
 #debug2 {
-	color:green;
+	text-align:center;
+	font-size: 10px;
+	color: green;
 }
 
 #viewport {

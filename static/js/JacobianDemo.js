@@ -118,6 +118,11 @@ var foo = function() {
 			manifold.animating = !manifold.animating;
 			$('#viewport').toggle('slow');
 			$('#viewport').toggleClass('active');
+			if ($('#viewport').hasClass('active')) {
+				$('#debug').html("<br><br><br><br><br><br><br>This is glitchy, so you may need to click around before you see anything.");
+			} else {
+				$('#debug').html("");
+			}
 		});
 
 	$(".fancy_button")
@@ -139,7 +144,15 @@ var foo = function() {
 	var space_B = manifold.space3(board_B, new THREE.Vector3(0,0,0), "axes", "B");
 	var space_C = manifold.space3(board_C, new THREE.Vector3(0,0,0), "axes", "C");
 
+	var f = manifold.mathFunction(squiggle_2, "f");
+	var g = manifold.mathFunction(donut, "g");
+
 	var controlPoint2D = manifold.controlPoint(board_A, space_A, 2, "x");
+	var sneakyGridLines = manifold.nearbyGridLines(space_A, controlPoint2D, 2, 0.4, 12);
+	var warpyGridLines = manifold.image(f, sneakyGridLines, space_B, true, board_A, board_B);
+	var warpyGridLines2 = manifold.image(g, warpyGridLines, space_C, true, board_B, board_C);
+
+
 
 	var tangentSpace2D = manifold.createTangentSpace(space_A, controlPoint2D);
 	var basicBasis2D = manifold.addUnitBasis(2, tangentSpace2D);
@@ -157,13 +170,12 @@ var foo = function() {
 	//var tangentSpace = manifold.createTangentSpace(space_C, controlPoint);
 	//var basicBasis = manifold.addUnitBasis(3, tangentSpace);
 
-	var f = manifold.mathFunction(squiggle_2, "f");
+
 
 	// How can I make Jacobian operations automatic?
 	var D_Spherical = manifold.approximateJacobian(f, 0.0001);
-	var jacobianMatrixDisplay = manifold.showJacobian(D_Spherical, controlPoint2D, 2);
+	var jacobianMatrixDisplay = manifold.showJacobian(D_Spherical, controlPoint2D, 2, 2);
 	var transformedTangentSpace = manifold.warpTangentSpaceWithJacobian(tangentSpace2D, space_B, D_Spherical, f, controlPoint2D);
-	var g = manifold.mathFunction(donut, "g");
 	var controlPointImage = manifold.imageOfControlPoint(controlPoint2D, f, space_B);
 	var controlPointImage2 = manifold.imageOfControlPoint(controlPointImage, g, space_C);
 
@@ -173,29 +185,6 @@ var foo = function() {
 
 	var D_spherical2 = manifold.approximateJacobian(g, 0.0001);
 	var transformedTangentSpace2 = manifold.warpTangentSpaceWithJacobian(transformedTangentSpace, space_C, D_spherical2, g, controlPointImage);
-
-	var sneakyGridLines = manifold.nearbyGridLines(space_A, controlPoint2D, 2, 0.4, 12);
-	var warpyGridLines = manifold.image(f, sneakyGridLines, space_B, true, board_A, board_B);
-	var warpyGridLines2 = manifold.image(g, warpyGridLines, space_C, true, board_B, board_C);
-
-	/*
-	var funControlPoint = manifold.controlPoint(board_B, space_B, 3, "y", new THREE.Vector3(0, 0, 0));
-
-	var x_column = manifold.controlPoint(board_C, space_C, 3, "p", new THREE.Vector3(1, 0, 0));
-	var y_column = manifold.controlPoint(board_C, space_C, 3, "q", new THREE.Vector3(0, 1, 0));
-	var z_column = manifold.controlPoint(board_C, space_C, 3, "r", new THREE.Vector3(0, 0, 1));
-
-	var funBasis = manifold.addUnitBasis(3, space_B);
-
-	var transformation = manifold.controlledLinearTransformation(x_column, y_column, z_column, "M");
-
-	var gridLines = manifold.nearbyGridLines(space_B, funControlPoint, 3, 1.0, 3);
-	var stretchedGridLines = manifold.image(transformation, gridLines, space_C, true, board_B, board_C);
-
-	var D_transformation = manifold.approximateJacobian(transformation, 0.0001);
-	var transformedTangentSpace = manifold.warpTangentSpaceWithJacobian(funBasis, space_C, D_transformation, transformation, funControlPoint);
-
-	*/
 
 	manifold.render();
 };
