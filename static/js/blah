@@ -1,0 +1,8 @@
+$( document ).ready(function() {
+  $("section").hide();
+  $(window).on("hashchange", function(){
+    var hash = window.location.hash.substring(1); // hash part of url withou the first letter (#)
+    $("section").hide();
+    $("#"+hash).show();
+    });
+});
