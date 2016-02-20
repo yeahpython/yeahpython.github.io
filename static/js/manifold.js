@@ -144,6 +144,7 @@ console.log(this);
 		l_2.attr("fill", "transparent");
 
 		var duration = 0;
+		var x_1, y_1, x_1_a, y_1_a, x_2, y_2, x_2_a, y_2_a;
 		updateRules.push({
 			update:function(){
 				var vector_1 = getScreenPositionFromBoard(object_1.position, board_1, "2D");
@@ -156,21 +157,28 @@ console.log(this);
 				var endpoint_2 = new THREE.Vector3().lerpVectors(vector_2, vector_1, 0);
 
 				if (point_1_ok) {
-					c_1.animate({cx : endpoint_1.x, cy:endpoint_1.y}, duration);
+					x_1 = Math.round(endpoint_1.x);
+					y_1 = Math.round(endpoint_1.y);
+					x_1_a = Math.round(endpoint_1.x);
+					y_1_a = Math.round(endpoint_1.y - 80);
+
+					c_1.animate({cx : x_1, cy: y_1}, duration);
 					//l.animate({x1 : endpoint_1.x, y1:endpoint_1.y}, duration);
 				} else {
 					// console.log("not updating connection to " + object_1.name + " because z value is " + vector_1.z);
 				}
 				if (point_2_ok) {
-					c_2.animate({cx : endpoint_2.x, cy:endpoint_2.y}, duration);
+					x_2 = Math.round(endpoint_2.x);
+					y_2 = Math.round(endpoint_2.y);
+					x_2_a = Math.round(endpoint_2.x);
+					y_2_a = Math.round(endpoint_2.y - 80);
+					c_2.animate({cx : x_2, cy: y_2}, duration);
 					//l.animate({x2 : endpoint_2.x, y2:endpoint_2.y}, duration);
 				} else {
 					// console.log("not updating connection to " + object_2.name+ " because z value is " + vector_2.z);
 				}
-				var target =  "M " + Math.round(endpoint_1.x) + " " + Math.round(endpoint_1.y) +
-				             " C " + Math.round(endpoint_1.x) + " " + Math.round(endpoint_1.y - 80) +
-				               " " + Math.round(endpoint_2.x) + " " + Math.round(endpoint_2.y - 80) +
-				               " " + Math.round(endpoint_2.x) + " " + Math.round(endpoint_2.y);
+				var target = "M " + x_1   + " " + y_1   + " C " + x_1_a + " " + y_1_a +
+				             " "  + x_2_a + " " + y_2_a + " "   + x_2   + " " + y_2;
 				//console.log(target);
 				l_2.attr("d", target);
 			}

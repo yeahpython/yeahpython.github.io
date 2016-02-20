@@ -1,0 +1,141 @@
+#users {
+	background-color: #eeeeee;
+	width: 100%;
+	height: 20px;
+	position: fixed;
+	left: 0;
+	top: 70%;
+	cursor:pointer;
+}
+
+/*#start_chat {
+	position: fixed;
+	left: 50%;
+	bottom: 50%;
+	background-color: #00ff00;
+	padding: 5px;
+	border-radius: 5px;
+	margin-bottom: 10px;
+	font-family: sans-serif;
+	font-variant: small-caps;
+	cursor: pointer;
+	transform: translate(-50%, 0px);
+}*/
+
+#chats {
+	position: fixed;
+	left: 0;
+	top: 70%;
+}
+
+#backdrop{
+	background-color: #333333;
+	position:fixed;
+	width:100%;
+	height:100%;
+	left:0;
+	top:0;
+	cursor:pointer;
+}
+
+.person {
+	position: absolute;
+	display: block;
+}
+
+.icon {
+	position: absolute;
+	background-color: #666666;
+	color: white;
+	text-align: center;
+	font-family: sans-serif;
+	display: block;
+	padding: 5px;
+	margin-left: -5px;
+	margin-top: -5px;
+	border-radius: 20px;
+	cursor: default;
+	z-index: 0;
+}
+
+.debug {
+	text-align: right;
+	color: #aaaaaa;
+	font-size: 8pt;
+	display: none;
+}
+
+.me {
+	background-color:#f07d3a;
+}
+
+.mymessagecontainer {
+	text-align: right;
+
+}
+
+.theirmessagecontainer {
+	text-align: left;
+
+}
+
+.messages {
+	/*overflow: auto;
+	max-height: 190px;*/
+}
+
+.message {
+    padding:5px;
+    margin: 2px;
+	border-radius: 5px;
+	display:inline-block;
+	color:white;
+	font-size: 10pt;
+}
+
+.my{
+	background-color: #f07d3a;
+}
+
+.their{
+	background-color: #f03a7d;
+}
+
+.conversation {
+	position:absolute;
+	display:block;
+	z-index: -10;
+	background-color: rgba(255,255,255,0.9);
+	padding: 20px;
+	font-family: sans-serif;
+	border-radius: 10px;
+	vertical-align: top;
+	transform: translate(-50%, -10px);
+}
+
+.participants {
+	position:fixed; /* temporary as I don't know how to hide it properly */
+	color : red;
+	font-size: 8pt;
+    display: none;
+}
+
+.xCoordinate, .yCoordinate {
+	display: none;
+}
+
+.options {
+	position:absolute;
+	background-color: #ffffff;
+	font-variant: small-caps;
+	font-family: sans-serif;
+	color: green;
+	padding: 5px;
+	width: 60px;
+	text-align: right;
+	border-radius: 10px;
+	margin-top: -15px;
+	margin-left: -15px;
+	z-index: -1;
+	cursor: pointer;
+}
