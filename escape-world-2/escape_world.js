@@ -78,27 +78,31 @@ function cacheUserPosition(id, position) {
   $("#" + id + " > .targetLocation > .yCoordinate").html(position.y);
 }
 
+// will not center correctly if cache_participants is not done on the conversation.
 function recenterChatPosition(conversation_id, time) {
-  console.log(time);
   var n = 0;
-    var newleft = 0;
-    var newbottom = 0;
-    $("#" + conversation_id + "> .participants > div").each(function(index){
-      n += 1;
-      var id = $(this).text();
-      newleft += Number($("#" + id + " > .targetLocation > .xCoordinate").html());
-      newbottom += Number($("#" + id + " > .targetLocation > .yCoordinate").html());
-    });
-    if (n == 0) {
-      console.log("found no participants")
-    } else {
-      newleft /= n;
-      newbottom /= n;
-    }
-    console.log("newleft: " + newleft);
-    // give the conversation a new target on the page.
-    // $("#" + conversation_id).stop().animate({"left": newleft, "bottom": -1 * newbottom}, {duration: time})
-    $("#" + conversation_id).stop().animate({"left": newleft, "bottom": "50%"}, {duration: time})
+  var newleft = 0;
+  var newbottom = 0;
+  $("#" + conversation_id + "> .participants > div").each(function(index){
+    n += 1;
+    var id = $(this).text();
+    newleft += Number($("#" + id + " > .targetLocation > .xCoordinate").html());
+    newbottom += Number($("#" + id + " > .targetLocation > .yCoordinate").html());
+  });
+  console.log("found " + n + " participants in conversation " + conversation_id);
+  if (n == 0) {
+    console.log("found no participants")
+  } else {
+    newleft /= n;
+    newbottom /= n;
+  }
+  // give the conversation a new target on the page.
+  // $("#" + conversation_id).stop().animate({"left": newleft, "bottom": -1 * newbottom}, {duration: time})
+  console.log("Recentering conversation " + conversation_id + " to " + newleft);
+  $("#" + conversation_id)
+    .stop()
+    /*.toggleClass("highlight")*/
+    .animate({"left": newleft, "bottom": "50%"}, {duration: time});
 }
 
 function animateMotionTo(position, id) {
@@ -128,6 +132,7 @@ function animateMotionTo(position, id) {
 
 // There's a bad assumption here that the change is the user moving, where in fact it may be the addition of a new chat.
 usersRef.on("child_changed", function(snapshot){
+  console.log("a user changed!");
 	var val = snapshot.val().position;
   //cacheUserPosition(snapshot.key(), val);
   var distance = animateMotionTo(val, getMessageId(snapshot));
@@ -141,7 +146,7 @@ usersRef.on("child_changed", function(snapshot){
     } else {
       time = distance * 3;
       // otherwise the conversation moves with us
-      console.log("recentering 3");
+      console.log("recentering chat position as a result of user change")
       recenterChatPosition(conversation_id, time);
     }
   }
@@ -157,13 +162,14 @@ usersRef.on("child_removed", function(snapshot){
 var myUserRef = usersRef.push();
 var my_id = myUserRef.key();
 myUserRef.child('position').set({
-  x: 50,
+  x: $(window).width() / 2,
   y: 50,
   zIndex: 50
 });
 
 
 $("#backdrop, #users").click(function (e) {
+  console.log("received click.");
   if (e.target.id == "backdrop" || e.target.id == "users") {
     /*if (activeConversation != "") {
       leaveCurrentConversation();
@@ -177,10 +183,11 @@ $("#backdrop, #users").click(function (e) {
     } else {
       // We control the movement of the conversation, which will in turn modify the participants' locations.
 
-      chatsRef.child(activeConversation).child('position').set({
+      // marker bee
+      /*chatsRef.child(activeConversation).child('position').set({
         x: e.pageX - $("#users").position().left,
         y: e.pageY - $("#users").position().top
-      });
+      });*/
     }
   }
 });
@@ -206,7 +213,7 @@ function expandConversation(id, time) {
   var conversation = $("#" + id);
   conversation.children(".messages").show(time);
   conversation.children("input").show(time);
-  conversation.animate({"border-radius": 10, "padding":"20px"}, time);
+  //conversation.animate({"padding":"5px"}, time);
 }
 
 $("#chats").delegate(".conversation", "mouseover", function(e) {
@@ -217,9 +224,9 @@ $("#chats").delegate(".conversation", "mouseover", function(e) {
 
 function hideConversation(id, time) {
   var conversation = $("#" + id);
-  conversation.children(".messages").hide(time);
+  //conversation.children(".messages").hide(time);
   conversation.children("input").hide(time);
-  conversation.animate({"border-radius": 5, "padding":"5px"}, time);
+  //conversation.animate({"padding":"5px"}, time);
 }
 
 $("#chats").delegate(".conversation", "mouseleave", function(e) {
@@ -231,7 +238,8 @@ var FIXED_HEIGHT = "10px";
 var chatsRef = new Firebase("https://escape-world.firebaseio.com/chats/");
 
 function startConversationWith(id) {
-  var requestRef = usersRef.child(id).child("requests").push(hangoutLink);
+  console.log("starting conversation.");
+  //var requestRef = usersRef.child(id).child("requests").push(hangoutLink);
 
   var pos1 = getPositionFromId(my_id);
   var pos2 = getPositionFromId(id);
@@ -240,7 +248,8 @@ function startConversationWith(id) {
   activeParticipants[my_id] = true;
   var chat = chatsRef.push();
   chat.set({
-    position: {x: (pos1.x + pos2.x)/2, y: (pos1.y + pos2.y)/2},
+    // marker bee
+    // position: {x: (pos1.x + pos2.x)/2, y: (pos1.y + pos2.y)/2},
     activeParticipants: activeParticipants
   }, function(e){
     if (e == null) {
@@ -249,12 +258,13 @@ function startConversationWith(id) {
       console.log("Could not connect to server.");
     }
   });
+  setMyActiveConversation(chat.key());
   registerForAutoRemoval();
 }
 
-/*$("#start_chat").on("click", function(e) {
+$("#start_chat").on("click", function(e) {
   startConversationWith(my_id);
-});*/
+});
 
 var connectedRef = new Firebase("https://zfzcet128r5.firebaseio-demo.com//.info/connected");
 
@@ -290,6 +300,7 @@ function populate(messageContainer, snapshot) {
       messagerow.addClass("theirmessagecontainer");
     }
   });
+  cacheParticipants(snapshot);
   $("<div/>")
     .html("n = "+snapshot.child("activeParticipants").numChildren())
     .addClass("debug")
@@ -305,9 +316,8 @@ chatsRef.on("child_added", function(snapshot) {
   var chatbox = $("<div/>")
     .attr("id", getMessageId(snapshot))
     .addClass("conversation")
-    .css({"left": snapshot.val().position.x,
-          "bottom": snapshot.val().position.y * -1,
-          "z-index": snapshot.val().position.y}) // This kind of placing will soon be deprecated.
+    //.css({"left": snapshot.val().position.x,
+    //      "bottom": snapshot.val().position.y * -1}) // This kind of placing will soon be deprecated.
     .appendTo($("#chats"));
   var messageContainer = $("<div/>")
     .addClass("messages")
@@ -319,7 +329,7 @@ chatsRef.on("child_added", function(snapshot) {
     .appendTo(chatbox);
   populate(messageContainer, snapshot);
   cacheParticipants(snapshot);
-  console.log("recentering 1")
+  console.log("recentering new chat.")
   recenterChatPosition(getMessageId(snapshot), 0);
   $("<input type='text' name='fname'>")
     .appendTo(chatbox);
@@ -348,9 +358,11 @@ function addReferencesToConversation(chat_id) {
   // Remove my_id from the previous chat if it used to be a different one.
   if (activeConversation !== "" && activeConversation !== chat_id) {
     leaveCurrentConversation();
+    $(".activeConversation").removeClass("activeConversation");
     //startConversationWith(my_id);
     //chatsRef.child(activeConversation).child("activeParticipants").child(my_id).remove();
   }
+  $("#" + chat_id).addClass("activeConversation")
   // Cache the active conversation id.
   activeConversation = chat_id;
   // Ensure that my_id is removed from chats when I disconnect
@@ -360,6 +372,7 @@ function addReferencesToConversation(chat_id) {
 // Rule for adding chat messages
 $("#chats").delegate("input", "keypress", function(e) {
   if (e.which == 13) {
+    console.log("received input: " + e.target.value);
     // (A) update participant counts so that the message doesn't instantly disappear
     setMyActiveConversation(e.target.parentElement.id);
 
@@ -371,11 +384,26 @@ $("#chats").delegate("input", "keypress", function(e) {
       time: Firebase.ServerValue.TIMESTAMP
     });
     var new_x = $("#" + activeConversation)[0].style.left.slice(0, -2);
+    var n = 0;
+    var total = 0;
+    $("#" + activeConversation  + "> .participants > div").each(function(){
+      var id = $(this).text();
+      if (id != my_id) {
+        n += 1;
+        total += Number($("#" + id)[0].style.left.slice(0,-2));
+      }
+    });
+    if (n != 0) {
+      new_x = total / n;
+    }
     var new_y = $("#" + my_id)[0].style.top.slice(0, -2);
-    animateMotionTo({x: new_x, y:new_y}, my_id);
+    //animateMotionTo({x: new_x, y:new_y}, my_id);
+    myUserRef.child('position').set({
+        x: new_x,
+        y: new_y,
+      });
     //console.log("recentering 2");
     //recenterChatPosition(e.target.parentElement.id, 400);
-    console.log("sent message: " + e.target.value);
     e.target.value = "";
   }
 });
@@ -413,7 +441,8 @@ chatsRef.on("child_changed", function(snapshot){
       .html("");
     populate(messageContainer, snapshot);
     // todo: only do computations when participants change
-    recenterChatPosition(getMessageId(snapshot), 1000)
+    console.log("recentering chat position because of chat change.");
+    recenterChatPosition(getMessageId(snapshot), 1000);
     //moveGroup(snapshot);
     cacheParticipants(snapshot);
   }
@@ -422,7 +451,10 @@ chatsRef.on("child_changed", function(snapshot){
 chatsRef.on("child_removed", function(snapshot){
   var id = getMessageId(snapshot);
   // animation may get interrupted...
-  $("#" + id).animate({borderRadius:0, padding:0}, 200, "swing", function(){$("#" + id).remove()});
+  $("#" + id).hide(400);//.animate({borderRadius:0, padding:0}, 200, "swing");
+  setTimeout(function(){
+    $("#" + id).remove()
+  }, 400);
 })
 
 

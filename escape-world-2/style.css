@@ -1,26 +1,28 @@
 #users {
-	background-color: #eeeeee;
+	background-color: #ffffff;
 	width: 100%;
 	height: 20px;
 	position: fixed;
-	left: 0;
+	left: 0px;
 	top: 70%;
 	cursor:pointer;
 }
 
-/*#start_chat {
+#start_chat {
 	position: fixed;
 	left: 50%;
-	bottom: 50%;
-	background-color: #00ff00;
-	padding: 5px;
-	border-radius: 5px;
+	top: 70%;
+	background-color: #ffffff;
+	padding: 10px;
+	padding-left: 15px;
+	padding-right: 15px;
+	border-radius: 30px;
 	margin-bottom: 10px;
 	font-family: sans-serif;
 	font-variant: small-caps;
 	cursor: pointer;
-	transform: translate(-50%, 0px);
-}*/
+	transform: translate(-50%, 50px);
+}
 
 #chats {
 	position: fixed;
@@ -29,18 +31,26 @@
 }
 
 #backdrop{
-	background-color: #333333;
+	background-color: #222222;
 	position:fixed;
 	width:100%;
 	height:100%;
-	left:0;
-	top:0;
+	left:50%;
+	top:50%;
 	cursor:pointer;
+	transform: translate(-50%, -50%);
+}
+
+.activeConversation.conversation{
+	z-index: 0;
 }
 
 .person {
 	position: absolute;
 	display: block;
+	//border-radius: 10px;
+	//border: solid 10px white;
+	//transform: translate(-50%, -50%);
 }
 
 .icon {
@@ -85,12 +95,14 @@
 }
 
 .message {
-    padding:5px;
+    padding:4px;
     margin: 2px;
 	border-radius: 5px;
 	display:inline-block;
 	color:white;
 	font-size: 10pt;
+	max-width:170px;
+	word-wrap: break-word;
 }
 
 .my{
@@ -101,16 +113,34 @@
 	background-color: #f03a7d;
 }
 
+input[type="text"] {
+  display: block;
+  margin: 0;
+  appearance: none;
+  box-shadow: none;
+  border-radius: 5px;
+  border: solid 2px #eeeeee;
+  padding: 5px;
+  margin-top: 2px;
+  width:100%;
+  min-width: 50px;
+  display: block;
+}
+input[type="text"]:focus {
+  outline: none;
+}
+
 .conversation {
 	position:absolute;
 	display:block;
 	z-index: -10;
-	background-color: rgba(255,255,255,0.9);
-	padding: 20px;
+	background-color: rgba(255,255,255,1.0);
+	padding: 5px;
 	font-family: sans-serif;
-	border-radius: 10px;
+	border-radius: 20px;
+	border: solid 10px #222222;
 	vertical-align: top;
-	transform: translate(-50%, -10px);
+	transform: translate(-50%, 0px);
 }
 
 .participants {
@@ -118,6 +148,10 @@
 	color : red;
 	font-size: 8pt;
     display: none;
+}
+
+.highlight {
+	border: solid 3px red;
 }
 
 .xCoordinate, .yCoordinate {
