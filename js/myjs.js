@@ -165,6 +165,11 @@ var render_x, render_y;
 render_x = -3 * x_center + 2 * y_center;
 render_y = -2 * z_center + y_center;
 var RENDERING_BASEPOINT_X, RENDERING_BASEPOINT_Y;
+var player_x_rendering_offset = 0; // should be 0, 1  or 2
+var render_x_offset = 0;
+var player_z_rendering_offset = 0;
+
+
 
 var setDisplayParameters = function(w, h){
   // var VIEWPORT_HEIGHT = 1 + 2 * HEIGHT + DEPTH ;
@@ -403,7 +408,7 @@ function render_alternative(blocks, sortedCoordinates, lines, renderBuffer, dept
 }
 
 function render(blocks, sortedCoordinates) {
-  var X = RENDERING_BASEPOINT_X; // rightward shift of basepoint
+  var X = RENDERING_BASEPOINT_X + render_x_offset; // rightward shift of basepoint
   var Y = RENDERING_BASEPOINT_Y; // downward shift of basepoint
   clear(lines);
   /*setAll(depthBuffer, -1);*/
@@ -563,9 +568,15 @@ function render(blocks, sortedCoordinates) {
         //lines[YY + 2][XX + 1] = "<span style = \"color:#00FF00; background-color:black\">o</span>";
         //lines[YY + 2][XX + 2] = "<span style = \"color:#00FF00; background-color:black\">u</span>";
 
+        /*
         lines[YY + 2][XX + 0] = "<span style = \"color:#C3834C; background-color:black\">d</span>";
         lines[YY + 2][XX + 1] = "<span style = \"color:#C3834C; background-color:black\">o</span>";
         lines[YY + 2][XX + 2] = "<span style = \"color:#C3834C; background-color:black\">g</span>";
+        */
+
+        lines[YY + 2 - player_z_rendering_offset][XX + 2 - player_x_rendering_offset] = "<span style = \"color:#C3834C; background-color:black\">d</span>";
+
+
 /*
         lines[YY][XX+1] = "*";
         lines[YY+1][XX-1] = "_";
@@ -861,19 +872,52 @@ function update(blocks, sortedCoordinates) {
 
   var oldpos = playerpos.slice(0);
   var oldoffset = [offsetZ, offsetX, offsetY];
+  var old_player_x_rendering_offset = player_x_rendering_offset;
   if (LEVEL != 1) {
     if (keyStates[0]) {
-      tryToMovePlayer(0,1,0);
+      if (player_x_rendering_offset == 2) {
+      	var old = playerpos[1];
+      	tryToMovePlayer(0, 1, 0); // left or right
+      	if (playerpos[1] != old) {
+      		player_x_rendering_offset = 0;
+      	}
+  	  } else {
+  	  	player_x_rendering_offset += 1;
+  	  }
     } if (keyStates[1]) {
-      tryToMovePlayer(0,0,-1);
+      tryToMovePlayer(0, 0,-1);
     } if (keyStates[2]) {
-      tryToMovePlayer(0,-1,0);
+      if (player_x_rendering_offset == 0) {
+        var old = playerpos[1];
+        tryToMovePlayer(0, -1, 0);
+        if (playerpos[1] != old) {
+        	player_x_rendering_offset = 2;
+        }
+  	  } else {
+  	  	player_x_rendering_offset -= 1;
+  	  }
     } if (keyStates[3]) {
-      tryToMovePlayer(0,0,1);
+      tryToMovePlayer(0, 0, 1);
     } if (keyStates[4]) {
-      tryToMovePlayer(1,0,0);
+      if (player_z_rendering_offset == 1){
+      	var old = playerpos[0];
+      	tryToMovePlayer(1, 0, 0);
+      	if (playerpos[0] != old) {
+      		player_z_rendering_offset = 0;
+      	}
+      } else {
+      	player_z_rendering_offset += 1;
+      }
     } else {
-      tryToMovePlayer(-1,0,0);
+      if (player_z_rendering_offset == 0) {
+      	var old = playerpos[0];
+        tryToMovePlayer(-1,0, 0);
+        if (playerpos[0] != old) {
+        	player_z_rendering_offset = 1;
+        }
+  	  } else {
+  	  	player_z_rendering_offset -= 1;
+  	  }
     }
   }
 
@@ -893,6 +937,14 @@ function update(blocks, sortedCoordinates) {
     offsetX -= 1;
     playerpos[1] -=1;
     resetblocks = true;
+  }
+
+  if (playerpos[1] == x_space) {
+  	render_x_offset = player_x_rendering_offset - 2;
+  } else if (playerpos[1] == WIDTH - x_space - 1) {
+  	render_x_offset = player_x_rendering_offset;
+  } else {
+  	render_x_offset = 0;
   }
 
   if (playerpos[2] < y_space) {
@@ -922,9 +974,10 @@ function update(blocks, sortedCoordinates) {
   }
   var positionChanged = oldpos[0] != playerpos[0] || oldpos[1] != playerpos[1] || oldpos[2] != playerpos[2];
   var offsetChanged = offsetZ != oldoffset[0] || offsetX != oldoffset[1] || offsetY != oldoffset[2];
+  var player_x_rendering_offset_changed = player_x_rendering_offset != old_player_x_rendering_offset;
 
 
-  var needRedraw = positionChanged || offsetChanged || (LEVEL==1) || displayChanged;
+  var needRedraw = positionChanged || offsetChanged || player_x_rendering_offset_changed || (LEVEL==1) || displayChanged;
   if (needRedraw) {
     if (resetblocks) {
       setWaves(blocks, sortedCoordinates);
