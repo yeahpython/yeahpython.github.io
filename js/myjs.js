@@ -167,6 +167,7 @@ render_y = -2 * z_center + y_center;
 var RENDERING_BASEPOINT_X, RENDERING_BASEPOINT_Y;
 var player_x_rendering_offset = 0; // should be 0, 1  or 2
 var render_x_offset = 0;
+var render_z_offset = 0;
 var player_z_rendering_offset = 0;
 
 
@@ -219,7 +220,9 @@ function getSortedCoordinates(blocks){
 
         var YY = RENDERING_BASEPOINT_Y -2*z      +  y;
         var XX = RENDERING_BASEPOINT_X      -3*x + 2*y;
-        if ( XX -1  >= 0 && XX + 4 < VIEWPORT_WIDTH && YY >= 0 && YY + 3 < VIEWPORT_HEIGHT) {
+        // YY >= 1 is because cropping may move
+        // Similar for VIEWPORT_HEIGHT - 1
+        if ( XX -1  >= 0 && XX + 4 < VIEWPORT_WIDTH && YY >= 1 && YY + 3 < VIEWPORT_HEIGHT - 1) {
           coordinates.push([z,x,y]);
         }
       }
@@ -409,7 +412,8 @@ function render_alternative(blocks, sortedCoordinates, lines, renderBuffer, dept
 
 function render(blocks, sortedCoordinates) {
   var X = RENDERING_BASEPOINT_X + render_x_offset; // rightward shift of basepoint
-  var Y = RENDERING_BASEPOINT_Y; // downward shift of basepoint
+  var Y = RENDERING_BASEPOINT_Y + render_z_offset; // downward shift of basepoint
+  console.log("Y is: " + Y);
   clear(lines);
   /*setAll(depthBuffer, -1);*/
   for (var i = 0; i < sortedCoordinates.length; i++) {
@@ -618,8 +622,8 @@ function setString() {
   //displayText.innerHTML = "";
 
   var partialJoin = [];
-  skipInitial = 1;
-  skipEnd = 3;
+  skipInitial = 4;
+  skipEnd = 5;
   if (LEVEL == 1) {
     skipInitial = 16;
     skipEnd = 14;
@@ -873,6 +877,7 @@ function update(blocks, sortedCoordinates) {
   var oldpos = playerpos.slice(0);
   var oldoffset = [offsetZ, offsetX, offsetY];
   var old_player_x_rendering_offset = player_x_rendering_offset;
+  var old_player_z_rendering_offset = player_z_rendering_offset;
   if (LEVEL != 1) {
     if (keyStates[0]) {
       if (player_x_rendering_offset == 2) {
@@ -901,6 +906,7 @@ function update(blocks, sortedCoordinates) {
     } if (keyStates[4]) {
       if (player_z_rendering_offset == 1){
       	var old = playerpos[0];
+      	console.log(playerpos[0]);
       	tryToMovePlayer(1, 0, 0);
       	if (playerpos[0] != old) {
       		player_z_rendering_offset = 0;
@@ -909,6 +915,7 @@ function update(blocks, sortedCoordinates) {
       	player_z_rendering_offset += 1;
       }
     } else {
+      // no special treatment when falling because it looks weird
       if (player_z_rendering_offset == 0) {
       	var old = playerpos[0];
         tryToMovePlayer(-1,0, 0);
@@ -966,6 +973,16 @@ function update(blocks, sortedCoordinates) {
     playerpos[0] +=1;
     resetblocks = true;
   }
+
+  if (playerpos[0] == HEIGHT - z_space - 1) {
+  	render_z_offset = player_z_rendering_offset;
+  } else if (playerpos[0] == z_space) {
+  	// don't do when falling
+  	render_z_offset = 0;// player_z_rendering_offset;
+  } else {
+  	render_z_offset = 0;
+  }
+
   if (LEVEL == 1) {
     playerpos = [0,0,0];
     offsetZ = z_center;
@@ -975,9 +992,10 @@ function update(blocks, sortedCoordinates) {
   var positionChanged = oldpos[0] != playerpos[0] || oldpos[1] != playerpos[1] || oldpos[2] != playerpos[2];
   var offsetChanged = offsetZ != oldoffset[0] || offsetX != oldoffset[1] || offsetY != oldoffset[2];
   var player_x_rendering_offset_changed = player_x_rendering_offset != old_player_x_rendering_offset;
+  var player_z_rendering_offset_changed = player_z_rendering_offset != old_player_z_rendering_offset;
 
 
-  var needRedraw = positionChanged || offsetChanged || player_x_rendering_offset_changed || (LEVEL==1) || displayChanged;
+  var needRedraw = positionChanged || offsetChanged || player_z_rendering_offset_changed || player_x_rendering_offset_changed || (LEVEL==1) || displayChanged;
   if (needRedraw) {
     if (resetblocks) {
       setWaves(blocks, sortedCoordinates);
