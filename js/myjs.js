@@ -170,6 +170,12 @@ var render_x_offset = 0;
 var render_z_offset = 0;
 var player_z_rendering_offset = 0;
 
+var px = 0.0;
+var py = 0.0;
+var pz = 10.0;
+var pvx = 0.02;
+var pvy = 0.0;
+var pvz = 0.0;
 
 
 var setDisplayParameters = function(w, h){
@@ -413,9 +419,9 @@ function render_alternative(blocks, sortedCoordinates, lines, renderBuffer, dept
 function render(blocks, sortedCoordinates) {
   var X = RENDERING_BASEPOINT_X + render_x_offset; // rightward shift of basepoint
   var Y = RENDERING_BASEPOINT_Y + render_z_offset; // downward shift of basepoint
-  console.log("Y is: " + Y);
   clear(lines);
   /*setAll(depthBuffer, -1);*/
+  console.log("render");
   for (var i = 0; i < sortedCoordinates.length; i++) {
     var c = sortedCoordinates[i];
     var z = c[0];
@@ -564,6 +570,7 @@ function render(blocks, sortedCoordinates) {
           //lines[YY+2][XX+3] = "~";
         }
       else {
+      	console.log("drawing player!");
         /*lines[YY + 2][XX + 0] = "<span style = \"color:white\">y</span>";
         lines[YY + 2][XX + 1] = "<span style = \"color:white\">o</span>";
         lines[YY + 2][XX + 2] = "<span style = \"color:white\">u</span>";*/
@@ -703,7 +710,7 @@ var offsetY = 0;
 var offsetZ = 0;
 var playerpos = [HEIGHT -1, 0, 0];
 
-var LEVEL = 0;
+var LEVEL = 2;
 /*
 Modify this function to change the level
 */
@@ -800,6 +807,27 @@ function getWorldTile(z,x,y) {
     if (z==0 && y==0 && x==0) {
       output = 2;
     }
+  } else if (LEVEL == 2) {
+  	if (z == 0) {
+  		return 1;
+  	} else if (z == 1) {
+  		var xxx = Math.abs(x);
+  		var yyy = Math.abs(y);
+  		if ((xxx >= yyy && xxx % 2 == 0) || (yyy >= xxx && yyy % 10 == 0) ) {
+  			return 1;
+  		} else {
+  			return 0;
+  		}
+  	} else if (z==playerpos[0] && x==playerpos[1] && y==playerpos[2]) {
+  		return 2;
+  	}else {
+  		return 0;
+  	}
+  	if (Math.abs(z) == Math.abs(~~(x/2)) || Math.abs(z) == Math.abs(~~(y/2))) {
+  		return 1;
+  	} else {
+  		return 0;
+  	}
   } else {
     if (z == 0) {
       output = 1;
@@ -879,53 +907,38 @@ function update(blocks, sortedCoordinates) {
   var old_player_x_rendering_offset = player_x_rendering_offset;
   var old_player_z_rendering_offset = player_z_rendering_offset;
   if (LEVEL != 1) {
-    if (keyStates[0]) {
-      if (player_x_rendering_offset == 2) {
-      	var old = playerpos[1];
-      	tryToMovePlayer(0, 1, 0); // left or right
-      	if (playerpos[1] != old) {
-      		player_x_rendering_offset = 0;
-      	}
-  	  } else {
-  	  	player_x_rendering_offset += 1;
-  	  }
-    } if (keyStates[1]) {
-      tryToMovePlayer(0, 0,-1);
-    } if (keyStates[2]) {
-      if (player_x_rendering_offset == 0) {
-        var old = playerpos[1];
-        tryToMovePlayer(0, -1, 0);
-        if (playerpos[1] != old) {
-        	player_x_rendering_offset = 2;
-        }
-  	  } else {
-  	  	player_x_rendering_offset -= 1;
-  	  }
-    } if (keyStates[3]) {
-      tryToMovePlayer(0, 0, 1);
-    } if (keyStates[4]) {
-      if (player_z_rendering_offset == 1){
-      	var old = playerpos[0];
-      	console.log(playerpos[0]);
-      	tryToMovePlayer(1, 0, 0);
-      	if (playerpos[0] != old) {
-      		player_z_rendering_offset = 0;
-      	}
-      } else {
-      	player_z_rendering_offset += 1;
-      }
-    } else {
-      // no special treatment when falling because it looks weird
-      if (player_z_rendering_offset == 0) {
-      	var old = playerpos[0];
-        tryToMovePlayer(-1,0, 0);
-        if (playerpos[0] != old) {
-        	player_z_rendering_offset = 1;
-        }
-  	  } else {
-  	  	player_z_rendering_offset -= 1;
-  	  }
-    }
+  	pvz += -0.01;
+  	var a = 0.01
+  	if (keyStates[0]) {
+  		pvx += a;
+  	}
+  	if (keyStates[2]) {
+  		pvx -= a;
+  	}
+  	if (keyStates[1]) {
+  		pvy -= a;
+  	}
+  	if (keyStates[3]) {
+  		pvy += a;
+  	}
+  	if (keyStates[4]) {
+  		pvz += 2 * a;
+  	}
+  	px += pvx;
+  	py += pvy;
+  	pz += pvz;
+  	if (pz < 2.5) {
+  		pz = 2.5;
+  	}
+
+
+
+  	playerpos[0] = ~~pz;
+  	playerpos[1] = ~~px;
+  	playerpos[2] = ~~py;
+
+  	player_z_rendering_offset = ~~(2 * (pz - ~~pz) - (py - ~~py));
+  	player_x_rendering_offset = ~~(3 * (px - ~~px) - 2 * (py - ~~py));
   }
 
 
@@ -935,53 +948,11 @@ function update(blocks, sortedCoordinates) {
   var x_space = WIDTH / 2 - 4;
   var y_space = DEPTH / 2 - 4;
   var z_space = HEIGHT / 2 - 4;
+  offsetX = 30;
+  offsetY = 20;
+  offsetZ = 0;
 
-  if (playerpos[1] < x_space) {
-    offsetX += 1;
-    playerpos[1] += 1;
-    resetblocks = true;
-  } else if (playerpos[1] >=  WIDTH - x_space) {
-    offsetX -= 1;
-    playerpos[1] -=1;
-    resetblocks = true;
-  }
-
-  if (playerpos[1] == x_space) {
-  	render_x_offset = player_x_rendering_offset - 2;
-  } else if (playerpos[1] == WIDTH - x_space - 1) {
-  	render_x_offset = player_x_rendering_offset;
-  } else {
-  	render_x_offset = 0;
-  }
-
-  if (playerpos[2] < y_space) {
-    offsetY += 1;
-    playerpos[2] += 1;
-    resetblocks = true;
-  } else if (playerpos[2] >= DEPTH - y_space) {
-    offsetY -= 1;
-    playerpos[2] -=1;
-    resetblocks = true;
-  }
-
-  if (playerpos[0]  >= HEIGHT - z_space) {
-    offsetZ -= 1;
-    playerpos[0] -= 1;
-    resetblocks = true;
-  } else if (playerpos[0] < z_space) {
-    offsetZ += 1;
-    playerpos[0] +=1;
-    resetblocks = true;
-  }
-
-  if (playerpos[0] == HEIGHT - z_space - 1) {
-  	render_z_offset = player_z_rendering_offset;
-  } else if (playerpos[0] == z_space) {
-  	// don't do when falling
-  	render_z_offset = 0;// player_z_rendering_offset;
-  } else {
-  	render_z_offset = 0;
-  }
+  resetblocks = true;
 
   if (LEVEL == 1) {
     playerpos = [0,0,0];
@@ -989,6 +960,7 @@ function update(blocks, sortedCoordinates) {
     offsetX = x_center;
     offsetY = y_center;
   }
+
   var positionChanged = oldpos[0] != playerpos[0] || oldpos[1] != playerpos[1] || oldpos[2] != playerpos[2];
   var offsetChanged = offsetZ != oldoffset[0] || offsetX != oldoffset[1] || offsetY != oldoffset[2];
   var player_x_rendering_offset_changed = player_x_rendering_offset != old_player_x_rendering_offset;
@@ -1003,11 +975,12 @@ function update(blocks, sortedCoordinates) {
 
     if (1 || offsetChanged) {
       try {
+      	//console.log(playerpos[0], playerpos[1], playerpos[2]);
+      	//blocks[playerpos[0]][playerpos[1]][playerpos[2]] = 2;
         render(blocks, sortedCoordinates);
       } catch (e){
         console.log(e.message);
       } finally {
-
       }
       // renderBuffer should contain a map of the non-player environment here.
     } else {
