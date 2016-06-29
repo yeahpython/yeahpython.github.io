@@ -582,9 +582,26 @@ function render(blocks, sortedCoordinates) {
         lines[YY + 2][XX + 1] = "<span style = \"color:#C3834C; background-color:black\">o</span>";
         lines[YY + 2][XX + 2] = "<span style = \"color:#C3834C; background-color:black\">g</span>";
         */
-
-        lines[YY + 2 - player_z_rendering_offset][XX + 2 - player_x_rendering_offset] = "<span style = \"color:#C3834C; background-color:black\">d</span>";
-
+        for (var u = -2; u < 3; u++) {
+        	for (var v = -4; v < 5; v++) {
+        		var distance = Math.abs(player_x_rendering_offset - v - (3 * (px - Math.floor(px)) - 2 * (py - Math.floor(py)))) / 1.5 +
+        		               Math.abs(player_z_rendering_offset - u - (2 * (pz - Math.floor(pz)) - (py - Math.floor(py))));
+        		var symbol = " ";
+        		if (distance <= 1.5) {
+        			symbol = "*";
+        		} else if (distance <= 2.0) {
+        			symbol = "+";
+        		} else if (distance <= 2.5) {
+        			symbol = "~";
+        		} else if (distance <= 3.5) {
+        			symbol = "-";
+        		}
+        		if (symbol != " ") {
+        			//lines[YY + 2 - player_z_rendering_offset + u][XX + 2 - player_x_rendering_offset + v] = "<span style = \"color:#C3834C; background-color:black\">"+symbol+"</span>";
+             lines[YY + 2 - player_z_rendering_offset + u][XX + 2 - player_x_rendering_offset + v] = symbol;
+        		}
+    		}
+    	}
 
 /*
         lines[YY][XX+1] = "*";
@@ -1086,6 +1103,8 @@ function update(blocks, sortedCoordinates) {
     offsetY = y_center;
   }
 
+  // #*+-
+
   var positionChanged = oldpos[0] != playerpos[0] || oldpos[1] != playerpos[1] || oldpos[2] != playerpos[2];
   var offsetChanged = offsetZ != oldoffset[0] || offsetX != oldoffset[1] || offsetY != oldoffset[2];
   var player_x_rendering_offset_changed = player_x_rendering_offset != old_player_x_rendering_offset;
@@ -1093,7 +1112,7 @@ function update(blocks, sortedCoordinates) {
 
 
   var needRedraw = positionChanged || offsetChanged || player_z_rendering_offset_changed || player_x_rendering_offset_changed || (LEVEL==1) || displayChanged;
-  if (needRedraw) {
+  if (1 || needRedraw) {
     if (resetblocks) {
       setWaves(blocks, sortedCoordinates);
     }
