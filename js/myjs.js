@@ -174,7 +174,7 @@ var px = 0.0;
 var py = 0.0;
 var pz = 10.0;
 var pvx = 0.02;
-var pvy = 0.0;
+var pvy = 0.02;
 var pvz = 0.0;
 
 
@@ -625,7 +625,7 @@ var keyStates = [false, false, false, false, false];
 
 function setString() {
   var displayText = document.getElementById('active-text');
-  displayText.innerHTML ="<br>Controls: WASD to move, J to jetpack";
+  displayText.innerHTML = "" + pz + ", " + px +", "+ py + "<br>Controls: WASD to move, J to jetpack";
   //displayText.innerHTML = "";
 
   var partialJoin = [];
@@ -813,14 +813,14 @@ function getWorldTile(z,x,y) {
   	} else if (z == 1) {
   		var xxx = Math.abs(x);
   		var yyy = Math.abs(y);
-  		if ((xxx >= yyy && xxx % 2 == 0) || (yyy >= xxx && yyy % 10 == 0) ) {
+  		if ((xxx >= yyy && xxx % 5 == 4) || (yyy >= xxx && yyy % 10 == 5) ) {
   			return 1;
   		} else {
   			return 0;
   		}
   	} else if (z==playerpos[0] && x==playerpos[1] && y==playerpos[2]) {
   		return 2;
-  	}else {
+  	} else {
   		return 0;
   	}
   	if (Math.abs(z) == Math.abs(~~(x/2)) || Math.abs(z) == Math.abs(~~(y/2))) {
@@ -850,6 +850,7 @@ function getWorldTile(z,x,y) {
   }
   if (z==playerpos[0]-offsetZ && x==playerpos[1]-offsetX && y==playerpos[2]-offsetY) {
       output = 2;
+      console.log("player still here");
   }
   return output;
 }
@@ -890,6 +891,100 @@ function tryToMovePlayer(dz, dx, dy) {
   }
 }
 */
+
+var debug;
+
+
+function projectOut(blocks) {
+	width = 0.3;
+
+
+	for (var i = 0; i < 6; i++) {
+		var pushed = false;
+
+		var mz = Math.floor(pz - width);
+		var Mz = Math.floor(pz + width);
+		var mx = Math.floor(px - width);
+		var Mx = Math.floor(px + width);
+		var my = Math.floor(py - width);
+		var My = Math.floor(py + width);
+
+
+		for (var z = mz; z <= Mz && !pushed; z+=1) {
+		for (var x = mx; x <= Mx && !pushed; x+=1) {
+		for (var y = my; y <= My && !pushed; y+=1) {
+			a = getWorldTile(z, x, y);
+			if (a == 1) {
+				// push in minimum valid direction
+				//console.log(pz, px, py);
+				//console.log(mz, Mz, mx, Mx, my, My);
+				var z_plus_move = getWorldTile(z+1, x, y) == 1 ? 10 : z + 1 + width - pz;
+				var z_minus_move = getWorldTile(z-1, x, y) == 1 ? -10 : z - width - pz;
+				var x_plus_move = getWorldTile(z, x+1, y) == 1 ? 10 : x + 1 + width - px;
+				var x_minus_move = getWorldTile(z, x-1, y) == 1 ? -10 : x - width - px;
+				var y_plus_move = getWorldTile(z, x, y+1) == 1 ? 10 : y + 1 + width - py;
+				var y_minus_move = getWorldTile(z, x, y-1) == 1 ? -10 : y - width - py;
+				var z_off = z_plus_move < -z_minus_move ? z_plus_move : z_minus_move;
+				var x_off = x_plus_move < -x_minus_move ? x_plus_move : x_minus_move;
+				var y_off = y_plus_move < -y_minus_move ? y_plus_move : y_minus_move;
+				//console.log(z_off, x_off, y_off);
+				if (Math.abs(z_off) < Math.abs(x_off) && Math.abs(z_off) < Math.abs(y_off)) {
+					pz += z_off;
+					pvz = 0.0;
+					//console.log("pushed vertically by ", z_off);
+					if (z_off != 0.0) {
+						pushed = true;
+					}
+				} else if (Math.abs(x_off) < Math.abs(y_off)) {
+					px += x_off;
+					pvx = 0.0;
+					if (x_off != 0.0) {
+						pushed = true;
+					}
+					//console.log("pushed in x direction by ", x_off);
+				} else {
+					py += y_off;
+					pvy = 0.0;
+					if (y_off != 0.0) {
+						pushed = true;
+					}
+					//console.log("pushed in y direction by ", y_off);
+				}
+			}
+		}
+		}
+		}
+	}
+
+	if (pz < 1.3) {
+		pz = 1.3;
+		pvz = 0.0;
+	}
+
+	/*if (a % 2 == 1) {
+		var z_rem = (pz - ~~pz);
+		var x_rem = (px - ~~px);
+		var y_rem = (py - ~~py);
+		var z_off = 1.0 - z_rem;// Always push up
+		var x_off = x_rem > 0.5 ? 1 - x_rem : - x_rem;
+		var y_off = y_rem > 0.5 ? 1 - y_rem : - y_rem;
+		if (Math.abs(z_off) < Math.abs(x_off) && Math.abs(z_off) < Math.abs(y_off)) {
+			pz += z_off;
+			pvz = 0.0;
+			console.log("pushed vertically");
+		} else if (Math.abs(x_off) < Math.abs(y_off)) {
+			px += x_off;
+			pvx = 0.0;
+			console.log("pushed in x direction");
+		} else {
+			py += y_off;
+			pvy = 0.0;
+			console.log("pushed in y direction");
+		}
+	}*/
+}
+
+
 function update(blocks, sortedCoordinates) {
   var displayText = document.getElementById('active-text');
   w = Math.round(displayText.offsetWidth / 8) + 14;
@@ -909,36 +1004,61 @@ function update(blocks, sortedCoordinates) {
   if (LEVEL != 1) {
   	pvz += -0.01;
   	var a = 0.01
-  	if (keyStates[0]) {
+  	if (keyStates[0]) { // A
   		pvx += a;
   	}
-  	if (keyStates[2]) {
+  	if (keyStates[2]) { // D
   		pvx -= a;
   	}
-  	if (keyStates[1]) {
+  	if (keyStates[1]) { // W
   		pvy -= a;
   	}
-  	if (keyStates[3]) {
+  	if (keyStates[3]) { // S
   		pvy += a;
   	}
   	if (keyStates[4]) {
   		pvz += 2 * a;
   	}
+
+  	if (pvz >= 0.1) {
+  		pvz = 0.1;
+  	}
+  	if (pvz <= -0.1) {
+  		pvz = -0.1;
+  	}
+
+  	if (pvx >= 0.1) {
+  		pvx = 0.1;
+  	}
+  	if (pvx <= -0.1) {
+  		pvx = -0.1;
+  	}
+
+  	if (pvy >= 0.1) {
+  		pvy = 0.1;
+  	}
+  	if (pvy <= -0.1) {
+  		pvy = -0.1;
+  	}
+
   	px += pvx;
   	py += pvy;
   	pz += pvz;
-  	if (pz < 2.5) {
+  	/*if (pz < 2.5) {
   		pz = 2.5;
-  	}
+  	}*/
+
+  	projectOut(blocks);
 
 
 
-  	playerpos[0] = ~~pz;
-  	playerpos[1] = ~~px;
-  	playerpos[2] = ~~py;
+  	playerpos[0] = Math.floor(pz);
+  	playerpos[1] = Math.floor(px);
+  	playerpos[2] = Math.floor(py);
 
-  	player_z_rendering_offset = ~~(2 * (pz - ~~pz) - (py - ~~py));
-  	player_x_rendering_offset = ~~(3 * (px - ~~px) - 2 * (py - ~~py));
+
+  	player_z_rendering_offset = Math.round(2 * (pz - Math.floor(pz)) - (py - Math.floor(py)));
+  	player_x_rendering_offset = Math.round(3 * (px - Math.floor(px)) - 2 * (py - Math.floor(py)));
   }
 
 
@@ -976,7 +1096,7 @@ function update(blocks, sortedCoordinates) {
     if (1 || offsetChanged) {
       try {
       	//console.log(playerpos[0], playerpos[1], playerpos[2]);
-      	//blocks[playerpos[0]][playerpos[1]][playerpos[2]] = 2;
+      	blocks[playerpos[0] + offsetZ][playerpos[1] + offsetX][playerpos[2]+offsetY] = 2;
         render(blocks, sortedCoordinates);
       } catch (e){
         console.log(e.message);
