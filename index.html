@@ -42,19 +42,25 @@
           Ever feel like the Internet is too much? I made a Chrome Extension that blurs out Internet content based on a user-specified blacklist.
         </div>
         <div class="col-sm-12 project">
-          <h3>Teaching Multivariable Calculus Visually</h3>
+          <h3>Teaching Multivariable Calculus Visually<br><small>mouseover to play video, click to pause</small></h3>
           <div class="row">
             <div class = "col-md-12">
-              <img src="images/manifold.png" style="width: 100%">
+              <!--img src="images/manifold.png" style="width: 100%"-->
+              <div class="embed-responsive embed-responsive-2504by776">
+                <video loop style="width=100%" id="manifold_animation">
+                  <source src="static/videos/manifold_animation.mov" type="video/mp4">
+                  "Your browser does not support the video tag."
+                </video>
+              </div>
             </div>
             <div class = "col-md-12">
-              This is taste of Manifold, my project to visualize multivariable calculus in the browser! See my <a href = "templates/jacobian.html">Jacobian</a> and <a href = "templates/linear_transformation.html">Linear Transformation</a> demos.
+              This is taste of Manifold, my project to visualize multivariable calculus in the browser! See my <a href = "manifold/static/html/jacobian.html">Jacobian</a> demo.
             </div>
           </div>
         </div>
 
         <div class="col-sm-12 project">
-          <h3> Bees!<br><small>mouseover to play, click to pause</small></h3>
+          <h3> Bees!<br><small>mouseover to play video, click to pause</small></h3>
           <!-- square aspect ratio -->
           <!--div class="embed-responsive embed-responsive-square">
             <video loop style="width=100%">
@@ -92,7 +98,7 @@
               </div>
               <div class="row">
                 <div class="description col-sm-12">
-                  These are teasers from from my <a href="https://github.com/yeahpython/bees-bees-bees">evolution simulation project</a>, where I equipped a population of virtual bees with neural networks!
+                  These are from from my <a href="https://github.com/yeahpython/bees-bees-bees">evolution simulation project</a>, where I equipped a population of virtual bees with neural networks!
                   <a href="http://stanford.edu/~tommyli/bees.html">
                     More pictures here!
                   </a>

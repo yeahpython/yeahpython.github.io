@@ -1,0 +1,143 @@
+body {
+	margin:0;
+	background-color:white;
+	padding-top: 65px;
+}
+
+/*.navbar {
+   background-color: transparent;
+   background: transparent;
+   border-color: transparent;
+}
+
+.navbar li a { color: #000 }
+*/
+
+#boards{
+	pointer-events: none;
+	position: fixed;
+	top:0px;
+}
+
+#board_A, #board_B, #board_C{
+	background-color: rgba(255,0,0,0.1);
+	z-index: 3;
+	display:inline-block;
+	height:400px;
+}
+
+#debug {
+	text-align:center;
+	font-size: 10px;
+	color:red;
+}
+
+#debug2 {
+	text-align:center;
+	font-size: 10px;
+	color: green;
+}
+
+#viewport {
+	display:block;
+	position:absolute;
+	left:50%;
+	top:50%
+}
+
+#info_panel {
+	font-size: 10pt;
+	text-align:center;
+}
+
+#description {
+	display:inline-block;
+	text-align: left;
+}
+
+#extra_content {
+	font-family: Georgia;
+}
+
+#jacobian_matrix {
+	padding: 5px;
+	display: inline-block;
+	background-color: white;
+}
+
+#button_array{
+	//position:absolute;
+	padding:10px;
+	width:100%;
+	margin-left:auto;
+	margin-right:auto;
+	text-align:center;
+	top:10px;
+}
+
+.fancy_button{
+	border: solid 5px black;
+	display:inline-block;
+	padding: 5px;
+	color:black;
+	text-align:center;
+	font-family: "Helvetica";
+	width: 150px;
+	border-radius: 15px;
+}
+
+.fancy_button:hover{
+	background-color:#eeeeee;
+	cursor: pointer;
+}
+
+.fancy_button:active{
+	color: black;
+}
+
+#svg_annotation{
+	position: fixed;
+	top: 0px;
+	z-index: 5;
+	pointer-events: none;
+}
+
+#viewport{
+	left: 0px;
+	top: 15%;
+}
+
+.selected {
+	background-color:black;
+	color:white;
+}
+.matrix_brackets {
+	display: inline-block;
+	border-right: 1px solid;
+	border-left: 1px solid;
+	border-radius: 5px;
+	text-align: right;
+	padding: 3px;
+}
+
+.matrix_column {
+	display: inline-block;
+	text-align: right;
+	padding: 3px;
+	width: 50px;
+	font-family: monospace;
+}
+
+.symbol {
+	min-width: 100px;
+	display: inline-block;
+	text-align: right;
+	font-style: italic;
+	vertical-align: top;
+}
+
+.symbol_explanation {
+	min-width: 50px;
+	display: inline-block;
+	vertical-align: top;
+}

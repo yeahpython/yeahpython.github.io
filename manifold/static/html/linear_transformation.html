@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html>
+  <head>
+      <script src="../../static/js/external/jquery-1.11.2.min.js"></script>
+
+      <!--loads a litte faster, I think-->
+      <!--script src="../../static/js/external/three.min.js"></script-->
+      <link rel="stylesheet" type="text/css" href="../../static/css/external/jquery.svg.css">
+      <script type="text/javascript" src="../../static/js/external/jquery.svg.js"></script>
+      <!--temporarily deactivated for debugging-->
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r79/three.min.js"></script>
+      <!-- Latest compiled and minified CSS -->
+      <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7" crossorigin="anonymous">
+
+      <!-- Optional theme -->
+      <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap-theme.min.css" integrity="sha384-fLW2N01lMqjakBkx3l/M9EahuwpSfeNvV63J5ezn3uZzapT0u7EYsXMjQV+0En5r" crossorigin="anonymous">
+
+      <!-- Latest compiled and minified JavaScript -->
+      <!--script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js" integrity="sha384-0mSbJDEHialfmuBBQP6A4Qrprq5OVfW37PRR3j5ELqxss1yVqOtnepnHVP9aJ7xS" crossorigin="anonymous"></script-->
+      <script src="../../static/js/external/three.js"></script>
+      <script src="../../static/js/external/snap.svg.js"></script>
+      <script src="../../static/js/manifold.js"></script>
+      <script src="../../static/js/LinearTransformationDemo.js"></script>
+      <script src="../../static/js/external/OrbitControls.js"></script>
+      <script src="../../static/js/external/arbor.js"></script>
+      <script src="../../static/js/external/THREEx.WindowResize.js"></script>
+      <!--script src="//js.leapmotion.com/leap-0.6.4.min.js"></script-->
+      <link rel="stylesheet" type="text/css" href="../../static/css/style2.css">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  </head>
+  <body onload="foo()">
+    <svg version="1.1"
+         xmlns="http://www.w3.org/2000/svg"
+         width="100%" height="100%" id = "svg_annotation"></svg>
+    <!--svg version="1.1"
+         xmlns="http://www.w3.org/2000/svg"
+         width="400" height="300">
+      <style>
+        circle {
+          fill-opacity: 0.5;
+          stroke-width: 4;
+          fill: #3080d0;
+          stroke: #3080d0;
+        }
+      </style>
+      <circle id="my-circle" cx="100" cy="100" r="50" />
+    </svg-->
+    <nav class="navbar navbar-default navbar-fixed-top">
+      <div class="container-fluid">
+        <div class="navbar-header">
+          <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <a class="navbar-brand" href="/">Manifold</a>
+        </div>
+        <div id="navbar" class="collapse navbar-collapse">
+          <ul class="nav navbar-nav">
+            <li><a href="/">Home</a></li>
+            <!--li><a href="#demo">Demo</a></li-->
+            <li><a href="linear_transformation.html">Linear Transformation</a></li>
+            <li><a href="jacobian.html">Jacobian</a></li>
+          </ul>
+        </div><!--/.nav-collapse -->
+      </div>
+    </nav>
+    <div id = "boards" style = "display:inline-block;position:fixed"></div>
+    <!--button onclick="toggleLeapControl()" id="control-button">Control with Leap Motion</button-->
+    <div class="container">
+      <div class = "row">
+        <div class = "col-md-12" style="text-align:center; padding-bottom:30px">
+          <h2>Matrices as Linear Transformations</h2>
+This is an interactive rig to make the idea of a linear transformation intuitive.
+Clicking and dragging the scenes to rotate the view. Mouseover and scroll to zoom in and out. Click and drag the control points in the scene on the right to modify the transformation.
+
+        </div>
+      </div>
+    </div>
+
+    <div class="container-fluid">
+	<div class = "row">
+	  <div class = "col-md-6 col-xs-12" id = "board_A"></div>
+	  <div class = "col-md-6 col-xs-12" id = "board_B"></div>
+	  <div class = "col-md-3 col-xs-12" id = "info_panel">
+	  <span id="control"></span>
+            <div id = "extra_content">
+              <div id = "description"></div>
+            </div>
+        </div>
+	</div>
+</div>
+    <div class = "container">
+      <div class = "row">
+        <!--div class = "col-md-6">
+          <div id = "info_panel">
+            <span id="control"></span>
+            <div id = "extra_content">
+              <div id = "description"></div>
+            </div>
+          </div>
+        </div-->
+        <div class = "col-md-12">
+          <div id = "button_array">
+            <div onclick="playPauseHander()" class="fancy_button" id="option">Pause Rendering</div>
+            <div class="fancy_button" id="toggle_info_panel_button">Toggle Info Panel*</div>
+            <div class="fancy_button" id = "toggle_graph_button">Toggle Graph</div>
+            <br><div id = "debug"></div><br><div id = "debug2"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <canvas id="viewport" width="900" height="400"></canvas>
+  </body>
+</html>

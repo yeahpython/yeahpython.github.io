@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% block javascript %} <script src="/static/js/JacobianDemo.js"></script>{% endblock %}
+{% block title_content%}
+<h2>Interactive Jacobian</h2>
+This is an interactive rig to visually supplement an explanation of the Jacobian operator. Click and drag the leftmost red-and-green lines to modify the input. Click and drag the rightmost panel to rotate the 3D view.
+
+{% endblock %}
+
+{% block page_content %}
+<div class="container-fluid">
+  <div class = "row">
+    <div class = "col-md-4 col-xs-12" id = "board_A"></div>
+    <div class = "col-md-4 col-xs-12" id = "board_B"></div>
+    <div class = "col-md-4 col-xs-12" id = "board_C"></div>
+    <div class = "col-md-12 col-xs-12" id = "info_panel">
+      <span id="control"></span>
+      <div id = "extra_content">
+        <div id = "description"></div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
