@@ -1,5 +1,6 @@
 body {
 	font-family: sans-serif;
+	background-color: #f5f5f5;
 }
 
 #container {
@@ -13,9 +14,9 @@ body {
 #me {
 	display: inline-block;
 	width:200px;
-	border-radius: 50%;
+	border-radius: 5%;
 	vertical-align: middle;
-	margin-left: 30px;
+	margin-left: 72px;
 	margin-right: 40px;
 	float: left;
 }
@@ -34,6 +35,14 @@ body {
 
 #top {
 	margin-top:90px;
+}
+
+.promo {
+	margin-left:auto;
+	margin-right:auto;
+	margin-top:30px;
+	max-width:100%;
+	display:block;
 }
 
 .project-title {
@@ -57,7 +66,7 @@ hr {
 	color: #555;
 	margin-top: 40px;
 	padding: 30px;
-	border-radius: 20px;
+	border-radius: 7px;
 	background-color: white;
 	border:solid 2px #eee;
 }
@@ -70,7 +79,7 @@ h1 {
 	-webkit-margin-end: 0px;
 	display: inline-block;
 	width: 280px; /* Needs to be wider than intro to have nice wrapping */
-	margin-top: 30px;
+	margin-top: 54px;
 }
 
 h2 {
