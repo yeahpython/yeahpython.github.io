@@ -8,7 +8,7 @@ body {
 	max-width:90%;
 	margin-left:auto;
 	margin-right:auto;
-	margin-top:70px;
+	margin-top:34px;
 }
 
 #me {
@@ -34,7 +34,6 @@ body {
 }
 
 #top {
-	margin-top:90px;
 }
 
 .promo {
@@ -55,9 +54,8 @@ body {
 
 hr {
 	height: 3px;
-	color: #eee;
 	border:none;
-	background-color: #eee;
+	background-color: #9b9b9b;
 }
 
 .project {
@@ -79,7 +77,7 @@ h1 {
 	-webkit-margin-end: 0px;
 	display: inline-block;
 	width: 280px; /* Needs to be wider than intro to have nice wrapping */
-	margin-top: 54px;
+	margin-top: 0px;
 }
 
 h2 {
@@ -89,11 +87,12 @@ h2 {
 }
 
 a:link {
+    color:#d25656;
 	text-decoration: none;
 }
 
 a:visited {
-	color:black;
+	color:#d25656;
 }
 
 a:hover .project-title {
