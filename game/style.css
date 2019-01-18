@@ -17,3 +17,23 @@ body {
 	margin-right:auto;
 	color: #15ffcd;
 }
+
+#container.levelDone {
+	animation: pulse 6s infinite;
+	animation-iteration-count: 1;
+	animation-fill-mode: forwards;
+}
+
+@keyframes pulse {
+	0%, 100% {
+	}
+	3% {
+		background-color:#631d8e;
+		color: #f91bc9;
+
+		/*color: #9bff0a;*/
+
+/*		background-color:#119e26;
+		color:#d7f7a8;*/
+	}
+}

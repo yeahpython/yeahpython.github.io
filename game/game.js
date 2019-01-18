@@ -12,9 +12,9 @@ var y_center = DEPTH / 2;
 // Available levels
 var INTRO = 0;
 var CUBE_FRAME = 1;
-var TESTER = 2;
+var FIGURE_EIGHT = 2;
 var SPINNING_SECTORS = 3;
-var FIGURE_EIGHT = 4;
+var TESTER = 4;
 var WETLANDS = 5;
 var RECTANGLES = 6;
 
@@ -63,15 +63,66 @@ var offsetZ = 0;
 var offsetX = 30;
 var offsetY = 20;
 
-function getLevelMessage(map_id, z, x, y){
-  if (map_id === INTRO) {
+function getFlagInfo(level, z, x, y){
+  if (level.map_id === INTRO) {
     if (x < 40) {
-      return ["Welcome!", "WASD to move,", "J to jetpack."];
+      return {message: ["Welcome!", "WASD to move,", "J to jetpack."],
+              finished: false};
     } else {
-      return ["Congratulations,", "you made it!"];
+      return {message:["Congratulations,", "you made it!"], finished:true};
     }
   }
-  return "Flag!"
+
+  if (level.map_id === CUBE_FRAME) {
+    if (Math.abs(x) < 100 && Math.abs(y) < 100) {
+      let seed = Math.abs((x + y)%3);
+      if (seed == 0) {
+        return {message: ["You'll have to look", "a little further", "than this!"],
+              finished: false};
+      }
+      if (seed == 1) {
+        return {message: ["I hear you need", "to go far out..."],
+              finished: false};
+      }
+      if (seed == 2) {
+        return {message: ["Not here!"],
+              finished: false};
+      }
+    } else {
+      return {message: ["You made it!"],
+              finished: true};
+    }
+  }
+  if (level.map_id === FIGURE_EIGHT) {
+    let flag_number;
+    if (y > 0) {
+      flag_number = 2;
+    }
+    else if (x > 5) {
+      flag_number = 1;
+    } else {
+      flag_number = 3;
+    }
+    let difference_code = (((flag_number - level.figureEightState) % 3) + 3) % 3;
+    if (difference_code == 1) {
+      level.figureEightState += 1;
+    }
+    // if (difference_code == 2) {
+    //   level.figureEightState -= 1;
+    // }
+    if (level.figureEightState >= 10) {
+      return {message:["You made it!", "(" + level.figureEightState + " / 10)"], finished:true};
+    }
+
+    if (difference_code != 2) {
+      return {message:["Keep going!", "(" + level.figureEightState + " / 10)"], finished:false};
+    }
+    if (difference_code == 2) {
+      return {message:["Wrong flag!", "(" + level.figureEightState + " / 10)"], finished:false};
+    }
+
+  }
+  return {message:["Finish!"], finished:true}
 };
 
 // Modify buffer sizes and change rendering parameters according to the provided dimensions.
@@ -141,7 +192,7 @@ function clear(lines) {
 // Fills in |lines| by iterating through |blocks| using |sortedCoordinates|
 //  - lines: Buffer to which we will render the text
 //  - level: Container for all the information associated with a given map.
-function render(lines, level) {
+function render(lines, level, found_end_callback) {
   var X = RENDERING_BASEPOINT_X + level.horizontal_camera_correction; // rightward shift of basepoint
   var Y = RENDERING_BASEPOINT_Y + level.vertical_camera_correction; // downward shift of basepoint
   clear(lines);
@@ -278,7 +329,8 @@ function render(lines, level) {
 
       lines[YY + 1][XX + 3] = bright ? "<span style = \"color:white\">!</span>" : "?";
       if (bright && level.getWorldTile(z + 1, x, y) != STREET_LIGHT && level.getWorldTile(z + 1, x, y) != PLAYER) {
-        var msg = getLevelMessage(level.map_id, z, x, y);
+        var flag_info = getFlagInfo(level, z, x, y);
+        var msg = flag_info.message;
         for (var row = 0; row < msg.length; row++) {
           for (var col = 0; col < msg[row].length; col++) {
             try {
@@ -287,6 +339,9 @@ function render(lines, level) {
               // ignore
             }
           }
+        }
+        if (flag_info.finished) {
+          found_end_callback();
         }
       }
 
@@ -528,6 +583,14 @@ function getFigureEightWorldTile(z, x, y) {
   }
 
   if (z > 0 && z < 5) {
+    if (x == 0 && y == 19) {
+      return STREET_LIGHT;
+    }
+
+    if (x == 0 && y == -19) {
+      return STREET_LIGHT;
+    }
+
     if (x < -18 && y < -18) {
       return SOLID_BLOCK;
     }
@@ -574,6 +637,10 @@ function getFigureEightWorldTile(z, x, y) {
     return INVISIBLE_BLOCK;
   }
 
+  if (z < 10 && x == 19 && y == 0) {
+    return STREET_LIGHT;
+  }
+
   return EMPTY;
 }
 
@@ -603,6 +670,7 @@ function getCubeFrameTile(z, x, y) {
     d = 13
     D = 26
 
+    // Extra ((... + D) % D) is to handle negative numbers
     x = ((((x + d) % D) + D) % D) - d
     y = ((((y + d) % D) + D) % D) - d
     a = Math.abs(x) == 5;
@@ -611,6 +679,9 @@ function getCubeFrameTile(z, x, y) {
     A = Math.abs(x) <= 5;
     B = Math.abs(z - 6) <= 5;
     C = Math.abs(y) <= 5;
+    if (x == y && y == 0 && z > 0 && z < 7) {
+      output = STREET_LIGHT;
+    }
     if (a && b && C || a && B && c || A && b && c) {
       output = SOLID_BLOCK;
     }
@@ -848,8 +919,9 @@ function createIteratorGenerator(sorted_coordinates, level) {
 }
 
 class Level {
-  constructor(map_id) {
+  constructor(map_id, increment_level_cb) {
     this.map_id = map_id;
+    this.increment_level_cb = increment_level_cb;
 
     // Fine-grained offset of player from their cube coordinate, used to enable sub-
     // block-sized motion.
@@ -888,6 +960,9 @@ class Level {
     this.camerapos = [0,0,0]
 
     this.getMapTile = getMapFetcher(this.map_id);
+
+    // Only used by FIGURE_EIGHT level.
+    this.figureEightState = 0;
 
     if (this.map_id === INTRO) {
       let sorted_coordinates = this.getSortedCoordinatesFromConnectedComponent(3, 0, 0);
@@ -1202,6 +1277,25 @@ class Game {
     this.level = level;
     this.force_redraw = true;
     this.frame_id = 0;
+
+    this.currently_leaving_level = false;
+  }
+
+  goToNextLevel() {
+    this.loadLevel((this.level.map_id + 1) % 3); // Only first three levels are good
+  }
+
+  goToNextLevelSoon() {
+    if (this.currently_leaving_level === false) {
+      this.currently_leaving_level = true;
+      document.getElementById('container').classList.add("levelDone");
+      var that = this;
+      setTimeout(function(){
+        that.goToNextLevel();
+        that.currently_leaving_level = false;
+        document.getElementById('container').classList.remove("levelDone");
+      }, 6000);
+    }
   }
 
   updateLoop() {
@@ -1213,9 +1307,9 @@ class Game {
 
     this.force_redraw = false;
 
-
+    var that = this;
     if (needRedraw) {
-      render(lines, this.level);
+      render(lines, this.level, function () {that.goToNextLevelSoon()});
       setString(document.getElementById('active-text'), lines);
     }
     var that = this;
@@ -1232,8 +1326,8 @@ class Game {
 function initialize() {
   blocks = generateBlockArray(HEIGHT, WIDTH, DEPTH);
   autoResize();
-  var current_map = INTRO;
-  var level = new Level(current_map);
+
+  var level = new Level(INTRO);
   var game = new Game(blocks, level);
 
   document.addEventListener("keydown", function(event) {
@@ -1244,8 +1338,7 @@ function initialize() {
     keyStates[String.fromCharCode(event.keyCode)] = false;
 
     if (String.fromCharCode(event.keyCode) == "N") {
-      current_map = (current_map + 1) % 5;
-      game.loadLevel(current_map);
+      game.goToNextLevel();
     }
   }, false);
 
