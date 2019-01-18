@@ -914,7 +914,7 @@ class Level {
     this.pvz += -0.1;
 
     // User input
-    var a = 0.1;
+    var a = 0.02;
     if (keyStates["A"] === true) {
       this.pvx += a;
     }
@@ -929,7 +929,7 @@ class Level {
     }
     if (keyStates["J"] === true) {
       if (this.jetpack_fuel) {
-        this.pvz += 2 * a;
+        this.pvz += 0.2;
         this.jetpack_fuel -= 1;
       }
     } else {
