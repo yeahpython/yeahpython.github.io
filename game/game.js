@@ -13,10 +13,12 @@ var y_center = DEPTH / 2;
 var INTRO = 0;
 var CUBE_FRAME = 1;
 var FIGURE_EIGHT = 2;
-var SPINNING_SECTORS = 3;
+var MOVING_MAP = 3;
 var TESTER = 4;
 var WETLANDS = 5;
 var RECTANGLES = 6;
+var SPINNING_SECTORS = 7;
+
 
 // Enumeration of block types.
 var EMPTY = 0;
@@ -25,6 +27,7 @@ var PLAYER = 2;
 var STREET_LIGHT = 3;
 var WAVE = 4;
 var INVISIBLE_BLOCK = 5;
+var INVISIBLE_SCAFFOLDING = 6;
 
 var MAX_FUEL = 10
 
@@ -216,8 +219,8 @@ function render(lines, level, found_end_callback) {
     var x = c[1];
     var y = c[2];
     var depth = x + y + z;
-
-    if (!tileIsVisible(level.getWorldTile(z, x, y))) {
+    var tile = level.getWorldTile(z, x, y);
+    if (!tileIsVisible(tile) || tile == INVISIBLE_SCAFFOLDING) {
     	continue;
     }
 
@@ -243,7 +246,6 @@ function render(lines, level, found_end_callback) {
     if (YY < 0 || YY + 3 >= VIEWPORT_HEIGHT || XX <= 1 || XX + 4 > VIEWPORT_WIDTH) {
       continue;
     }
-    var tile = level.getWorldTile(z, x, y);
     if (tile == SOLID_BLOCK){
 
       //   -101234
@@ -547,6 +549,13 @@ function getSpinningSectorsTile(z, x, y) {
 }
 
 function getFigureEightWorldTile(z, x, y) {
+  var tile = getFigureEightWorldTileInternal(z, x, y);
+  if (tile == INVISIBLE_BLOCK) {
+    return EMPTY;
+  }
+  return tile;
+}
+function getFigureEightWorldTileInternal(z, x, y) {
   if (x < -20 || x > 20 || y < -20 || y > 20 || z < 0) {
     return INVISIBLE_BLOCK;
   }
@@ -644,6 +653,36 @@ function getFigureEightWorldTile(z, x, y) {
   return EMPTY;
 }
 
+function getMovingMapTile(z, x, y) {
+  date = new Date()
+  t = date.getTime()
+  if ((x % 10 == 0) && (y % 10 == 0) && x * x + y * y > 40000 && z < 10 && z > 0) {
+    if (Math.sin(t / 2000 + x / 10 + y / 10) + Math.cos(t / 4000 + x / 10 - y / 7) <= 0.1) {
+      return STREET_LIGHT;
+    }
+  }
+
+  if (z != 0) {
+    return EMPTY;
+  }
+
+  if (x * x + y * y < 25) {
+    return SOLID_BLOCK;
+  }
+
+  // if ((x % 10 == 0) && (y % 10 == 0)) {
+  //   return SOLID_BLOCK;
+  // }
+
+  if ((x % 10 == 0) || (y % 10 == 0)) {
+    if (Math.sin(t / 2000 + x / 10 + y / 10) + Math.cos(t / 4000 + x / 10 - y / 7) > 0.1) {
+      return INVISIBLE_SCAFFOLDING;
+    }
+    return SOLID_BLOCK;
+  }
+  return EMPTY;
+}
+
 function getRectanglesLevelTile(z, x, y) {
   if (z == 0) {
     return SOLID_BLOCK;
@@ -667,19 +706,19 @@ function getCubeFrameTile(z, x, y) {
   if (z == 0) {
     output = SOLID_BLOCK;
   } else{
-    d = 13
-    D = 26
+    d = 11
+    D = 22
 
     // Extra ((... + D) % D) is to handle negative numbers
     x = ((((x + d) % D) + D) % D) - d
     y = ((((y + d) % D) + D) % D) - d
-    a = Math.abs(x) == 5;
-    b = Math.abs(z - 6) == 5;
-    c = Math.abs(y) == 5;
-    A = Math.abs(x) <= 5;
-    B = Math.abs(z - 6) <= 5;
-    C = Math.abs(y) <= 5;
-    if (x == y && y == 0 && z > 0 && z < 7) {
+    a = Math.abs(x) == 4;
+    b = Math.abs(z - 5) == 4;
+    c = Math.abs(y) == 4;
+    A = Math.abs(x) <= 4;
+    B = Math.abs(z - 5) <= 4;
+    C = Math.abs(y) <= 4;
+    if (x == y && y == 0 && z > 0 && z < 10) {
       output = STREET_LIGHT;
     }
     if (a && b && C || a && B && c || A && b && c) {
@@ -691,6 +730,13 @@ function getCubeFrameTile(z, x, y) {
 
 
 function getIntroTile(z, x, y) {
+  var val = getIntroTileInternal(z, x, y);
+  if (val == INVISIBLE_BLOCK) {
+    return EMPTY;
+  }
+  return val;
+}
+function getIntroTileInternal(z,x,y) {
   if (x <= 3) { // earliest section of map
     if (Math.abs(x) >= 4 || Math.abs(y) >= 4 || z < 0) {
       return INVISIBLE_BLOCK;
@@ -874,6 +920,8 @@ function getMapFetcher(map_id) {
       return getRectanglesLevelTile;
     case FIGURE_EIGHT:
       return getFigureEightWorldTile;
+    case MOVING_MAP:
+      return getMovingMapTile;
     case CUBE_FRAME:
       return getCubeFrameTile;
     case INTRO:
@@ -919,9 +967,9 @@ function createIteratorGenerator(sorted_coordinates, level) {
 }
 
 class Level {
-  constructor(map_id, increment_level_cb) {
+  constructor(map_id, level_failed_cb) {
     this.map_id = map_id;
-    this.increment_level_cb = increment_level_cb;
+    this.level_failed_cb = level_failed_cb;
 
     // Fine-grained offset of player from their cube coordinate, used to enable sub-
     // block-sized motion.
@@ -933,8 +981,11 @@ class Level {
     this.horizontal_camera_correction = 0; // should be 0, 1  or 2
     this.vertical_camera_correction = 0;
 
+    this.currently_leaving_level = false;
+    this.currently_dying = false;
+
     // Float coordinates of the user relative to the world coordinates.
-    if (this.map_id === INTRO || this.map_id === FIGURE_EIGHT) {
+    if (this.map_id === INTRO || this.map_id === FIGURE_EIGHT || this.map_id === MOVING_MAP) {
       this.px = 0.0;
     } else {
       this.px = 15.0;
@@ -961,15 +1012,21 @@ class Level {
 
     this.getMapTile = getMapFetcher(this.map_id);
 
+    this.timestep = 0;
+
     // Only used by FIGURE_EIGHT level.
     this.figureEightState = 0;
-
     if (this.map_id === INTRO) {
       let sorted_coordinates = this.getSortedCoordinatesFromConnectedComponent(3, 0, 0);
       this.getFreshIterator = createIteratorGenerator(sorted_coordinates, this);
     } else if (this.map_id === FIGURE_EIGHT) {
       let sorted_coordinates = this.getSortedCoordinatesFromConnectedComponent(0, 0, 0);
       this.getFreshIterator = createIteratorGenerator(sorted_coordinates, this);
+    } else if (this.map_id === MOVING_MAP) {
+      this.getFreshIterator = function() {
+        let sorted_coordinates = this.getSortedCoordinatesFromConnectedComponent(0, 10 * Math.round(this.playerpos[1] / 10), 10 * Math.round(this.playerpos[2] / 10) );
+        return createIteratorGenerator(sorted_coordinates, this)();
+      }
     } else {
       this.getFreshIterator = function() {
         for (var i = this.playerpos[0]; i > this.playerpos[0] - 50; i--) {
@@ -1048,7 +1105,8 @@ class Level {
     var mini_vx = this.pvx / 10;
     var mini_vy = this.pvy / 10;
     var mini_vz = this.pvz / 10;
-    for (var _ = 0; _ < 10; ++_) {
+    var n_steps = this.currently_dying ? 1 : 10;
+    for (var _ = 0; _ < n_steps; ++_) {
       this.px += mini_vx;
       this.py += mini_vy;
       this.pz += mini_vz;
@@ -1242,7 +1300,7 @@ class Level {
     var old_vertical_player_correction = this.vertical_player_correction;
 
     // Position and velocity update
-    if (this.map_id != SPINNING_SECTORS) {
+    if (this.map_id != SPINNING_SECTORS && !(this.currently_leaving_level && !this.currently_dying)) {
       this.physicsUpdate();
       this.updateDiscreteCoordinates();
     }
@@ -1259,42 +1317,61 @@ class Level {
       offsetX = 35 - this.camerapos[1];
     }
 
+    if (this.playerpos[0] < -20) {
+      this.level_failed_cb();
+    }
+
     // Detect if redraw is necessary. Checking for camera changes is unnecessary since all camera changes are induced by
     // player position changes.
     var positionChanged = oldpos[0] != this.playerpos[0] || oldpos[1] != this.playerpos[1] || oldpos[2] != this.playerpos[2];
     var offsetChanged = offsetZ != oldoffset[0] || offsetX != oldoffset[1] || offsetY != oldoffset[2];
     var horizontal_player_correction_changed = this.horizontal_player_correction != old_horizontal_player_correction;
     var vertical_player_correction_changed = this.vertical_player_correction != old_vertical_player_correction;
-
-    return positionChanged || offsetChanged || vertical_player_correction_changed || horizontal_player_correction_changed || (this.map_id==SPINNING_SECTORS);
+    var demanded_refresh = (this.timestep % 10 == 0);
+    this.timestep += 1;
+    return demanded_refresh || positionChanged || offsetChanged || vertical_player_correction_changed || horizontal_player_correction_changed || (this.map_id==SPINNING_SECTORS);
   }
 }
 
 // Singleton class for managing the entire flow.
 class Game {
-  constructor(blocks, level) {
+  constructor(blocks) {
     this.blocks = blocks;
-    this.level = level;
+    this.level = null;
     this.force_redraw = true;
     this.frame_id = 0;
-
-    this.currently_leaving_level = false;
   }
 
   goToNextLevel() {
-    this.loadLevel((this.level.map_id + 1) % 3); // Only first three levels are good
+    this.loadLevel((this.level.map_id + 1) % 4); // Only first four levels are good
   }
 
   goToNextLevelSoon() {
-    if (this.currently_leaving_level === false) {
-      this.currently_leaving_level = true;
-      document.getElementById('container').classList.add("levelDone");
+    if (this.level.currently_leaving_level === false) {
+      this.level.currently_leaving_level = true;
+      document.getElementById('active-text').classList.add("levelDone");
       var that = this;
       setTimeout(function(){
         that.goToNextLevel();
-        that.currently_leaving_level = false;
-        document.getElementById('container').classList.remove("levelDone");
-      }, 6000);
+        document.getElementById('active-text').classList.remove("levelDone");
+      }, 3000);
+    }
+  }
+
+  retryLevel() {
+    this.loadLevel(this.level.map_id); // Only first three levels are good
+  }
+
+  retryLevelSoon() {
+    if (this.level.currently_leaving_level === false) {
+      this.level.currently_leaving_level = true;
+      this.level.currently_dying = true;
+      document.getElementById('active-text').classList.add("levelFailed");
+      var that = this;
+      setTimeout(function(){
+        that.retryLevel();
+        document.getElementById('active-text').classList.remove("levelFailed");
+      }, 1200);
     }
   }
 
@@ -1319,7 +1396,8 @@ class Game {
   }
 
   loadLevel(id) {
-    this.level = new Level(id);
+    var that = this;
+    this.level = new Level(id, function() {that.retryLevelSoon()});
   }
 }
 
@@ -1327,8 +1405,8 @@ function initialize() {
   blocks = generateBlockArray(HEIGHT, WIDTH, DEPTH);
   autoResize();
 
-  var level = new Level(INTRO);
-  var game = new Game(blocks, level);
+  var game = new Game(blocks);
+  game.loadLevel(INTRO);
 
   document.addEventListener("keydown", function(event) {
     keyStates[String.fromCharCode(event.keyCode)] = true;
