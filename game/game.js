@@ -70,7 +70,7 @@ var offsetY = 20;
 function getFlagInfo(level, z, x, y){
   if (level.map_id === INTRO) {
     if (x < 40) {
-      return {message: ["Welcome!", "WASD to move,", "J to jetpack."],
+      return {message: ["Welcome!", "Arrows keys to move,", "spacebar to jetpack."],
               finished: false};
     } else {
       return {message:["Congratulations,", "you made it!"], finished:true};
@@ -707,14 +707,6 @@ function getPenroseTileInternal(z, x, y, use_alternative_map) {
     return EMPTY;
   }
 
-  // if (z == 1 && y == 20 && x < 20 && x >= 10) {
-  //   return INVISIBLE_SCAFFOLDING;
-  // }
-
-  // if (x == 20 && y == 20 && z < 10 & z > -40) {
-  //   return STREET_LIGHT;
-  // }
-
   if (use_alternative_map) {
     if (Y >= 2 && y < 19 && x <= 35 && x > 29) {
       if (z == -4) {
@@ -1134,26 +1126,32 @@ class Level {
   }
 
   physicsUpdate() {
+    var UP = keyStates["&"] || keyStates["W"]
+    var DOWN = keyStates["("] || keyStates["S"]
+    var LEFT = keyStates["%"] || keyStates["A"]
+    var RIGHT = keyStates["'"] || keyStates["D"]
+    var JETPACK = keyStates[" "] || keyStates["J"]
+
     // Gravity
     this.pvz += -0.1;
 
     // User input
     var a = 0.02;
-    if (keyStates["A"] === true) {
+    if (LEFT) {
       this.pvx += a;
     }
-    if (keyStates["D"] === true) {
+    if (RIGHT) {
       this.pvx -= a;
     }
-    if (keyStates["W"] === true) {
+    if (UP) {
       this.pvy -= a;
     }
-    if (keyStates["S"] === true) {
+    if (DOWN) {
       this.pvy += a;
     }
-    if (keyStates["J"] === true) {
+    if (JETPACK) {
       if (this.jetpack_fuel) {
-        this.pvz += 0.2;
+        this.pvz += 0.23 *  Math.cos(this.jetpack_fuel / MAX_FUEL);
         this.jetpack_fuel -= 1;
       }
     } else {
@@ -1161,10 +1159,10 @@ class Level {
     }
 
     // Velocity decay
-    if (!keyStates["A"] && !keyStates["D"] && !keyStates["W"] && !keyStates["S"] && !keyStates["J"]) {
-      this.pvx *= 0.9;
-      this.pvy *= 0.9;
-      this.pvz *= 0.9;
+    if (!LEFT && !RIGHT && !UP && !DOWN && !JETPACK) {
+      this.pvx *= 0.8;
+      this.pvy *= 0.8;
+      this.pvz *= 0.8;
     }
 
     // Velocity cap
@@ -1484,7 +1482,7 @@ class Level {
     var offsetChanged = offsetZ != oldoffset[0] || offsetX != oldoffset[1] || offsetY != oldoffset[2];
     var horizontal_player_correction_changed = this.horizontal_player_correction != old_horizontal_player_correction;
     var vertical_player_correction_changed = this.vertical_player_correction != old_vertical_player_correction;
-    var demanded_refresh = (this.timestep % 10 == 0);
+    var demanded_refresh = this.map_id == MOVING_MAP && (this.timestep % 10 == 0);
     this.timestep += 1;
     return demanded_refresh || positionChanged || offsetChanged || vertical_player_correction_changed || horizontal_player_correction_changed || (this.map_id==SPINNING_SECTORS);
   }
