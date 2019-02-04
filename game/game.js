@@ -1093,6 +1093,8 @@ class Level {
 
     this.use_alternative_penrose_map = false;
 
+    this.timestamp = new Date();
+
     // Only used by FIGURE_EIGHT level.
     this.figureEightState = 0;
     if (this.map_id === INTRO) {
@@ -1126,6 +1128,10 @@ class Level {
   }
 
   physicsUpdate() {
+    var new_time = new Date();
+    var dt = (new_time - this.timestamp) / 16;
+    this.timestamp = new_time;
+
     var UP = keyStates["&"] || keyStates["W"]
     var DOWN = keyStates["("] || keyStates["S"]
     var LEFT = keyStates["%"] || keyStates["A"]
@@ -1133,26 +1139,26 @@ class Level {
     var JETPACK = keyStates[" "] || keyStates["J"]
 
     // Gravity
-    this.pvz += -0.1;
+    this.pvz += -0.1 * dt;
 
     // User input
     var a = 0.02;
     if (LEFT) {
-      this.pvx += a;
+      this.pvx += a * dt;
     }
     if (RIGHT) {
-      this.pvx -= a;
+      this.pvx -= a * dt;
     }
     if (UP) {
-      this.pvy -= a;
+      this.pvy -= a * dt;
     }
     if (DOWN) {
-      this.pvy += a;
+      this.pvy += a * dt;
     }
     if (JETPACK) {
-      if (this.jetpack_fuel) {
-        this.pvz += 0.23 *  Math.cos(this.jetpack_fuel / MAX_FUEL);
-        this.jetpack_fuel -= 1;
+      if (this.jetpack_fuel > 0) {
+        this.pvz += 0.23 * dt * Math.cos(this.jetpack_fuel / MAX_FUEL);
+        this.jetpack_fuel -= 1 * dt;
       }
     } else {
       this.jetpack_fuel = 0;
@@ -1160,9 +1166,9 @@ class Level {
 
     // Velocity decay
     if (!LEFT && !RIGHT && !UP && !DOWN && !JETPACK) {
-      this.pvx *= 0.8;
-      this.pvy *= 0.8;
-      this.pvz *= 0.8;
+      this.pvx *= Math.pow(0.8, dt);
+      this.pvy *= Math.pow(0.8, dt);
+      this.pvz *= Math.pow(0.8, dt);
     }
 
     // Velocity cap
@@ -1197,9 +1203,9 @@ class Level {
     var mini_vz = this.pvz / 10;
     var n_steps = this.currently_dying ? 1 : 10;
     for (var _ = 0; _ < n_steps; ++_) {
-      this.px += mini_vx;
-      this.py += mini_vy;
-      this.pz += mini_vz;
+      this.px += mini_vx * dt;
+      this.py += mini_vy * dt;
+      this.pz += mini_vz * dt;
       this.projectOut(blocks);
     }
   }
